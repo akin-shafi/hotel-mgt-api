@@ -27,7 +27,7 @@ data_source_1.AppDataSource.initialize()
     console.log('Database connection established successfully.');
     const app = (0, express_1.default)();
     const isLocal = process.env.NODE_ENV === 'development';
-    const port = process.env.PORT || 8100;
+    const port = process.env.PORT || 8400;
     const url = isLocal ? process.env.LOCAL_URL : process.env.REMOTE_URL;
     // Trust the proxy
     app.set('trust proxy', 1);
@@ -35,6 +35,7 @@ data_source_1.AppDataSource.initialize()
     app.use((0, cors_1.default)({
         origin: [
             'http://localhost:3000', // React
+            'http://localhost:3002', // React
             'http://localhost:8080', // Vue
             'http://localhost:4200', // Angular
             'http://localhost:5173', // Vite
@@ -48,6 +49,7 @@ data_source_1.AppDataSource.initialize()
     app.options('*', (0, cors_1.default)({
         origin: [
             'http://localhost:3000',
+            'http://localhost:3002',
             'http://localhost:8080',
             'http://localhost:4200',
             'http://localhost:5173',

@@ -13,19 +13,36 @@ exports.RoomService = void 0;
 // src/services/RoomService.ts
 const data_source_1 = require("../data-source");
 const RoomEntity_1 = require("../entities/RoomEntity");
+const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
 class RoomService {
+    static getRoomByTenantIdAndRoomType(tenantId, roomType) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Find educational details by both applicationNo and courseOfStudy
+                return yield roomRepository.findOne({
+                    where: {
+                        tenantId,
+                        roomType
+                    }
+                });
+            }
+            catch (error) {
+                throw new Error(`Error finding educational details by application number and course of study: ${error.message}`);
+            }
+        });
+    }
     static getAllRooms() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).find();
         });
     }
-    static getRoomsByTenantId(talentId) {
+    static getRoomsByTenantId(tenantId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
                 // Fetch rooms by talentId
                 const rooms = yield roomRepository.find({
-                    where: { talentId }, // Assuming "hotelId" exists in your Room entity
+                    where: { tenantId }, // Assuming "hotelId" exists in your Room entity
                 });
                 return rooms;
             }
@@ -40,16 +57,32 @@ class RoomService {
             return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).findOneBy({ id });
         });
     }
-    static createRoom(roomData) {
+    static createRoom(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const room = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).create(roomData);
-            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).save(room);
+            try {
+                const roomData = roomRepository.create(data);
+                return yield roomRepository.save(roomData);
+            }
+            catch (error) {
+                throw new Error(`Error creating room details: ${error.message}`);
+            }
         });
     }
     static updateRoom(id, roomData) {
         return __awaiter(this, void 0, void 0, function* () {
             yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).update({ id }, roomData);
             return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).findOneBy({ id });
+        });
+    }
+    static update(id, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield roomRepository.update(id, data);
+                return yield roomRepository.findOneBy({ id });
+            }
+            catch (error) {
+                throw new Error(`Error updating Room details: ${error.message}`);
+            }
         });
     }
     static deleteRoom(id) {

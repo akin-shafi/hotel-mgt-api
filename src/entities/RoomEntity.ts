@@ -7,16 +7,16 @@ export class Room {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  roomNumber: string;  
-
-  @Column({ type: 'varchar', length: 50 })
+  @Column()
   roomType: string; 
 
-  @Column({ type: 'text', nullable: true })
-  description: string;
+  @Column()
+  numRooms: number;
+  
+  @Column()
+  currency: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column()
   pricePerNight: number;  
 
   @Column({ type: 'boolean', default: true })
@@ -32,10 +32,10 @@ export class Room {
   @JoinColumn({ name: 'hotelId' })  // Corrected 'tenantId' to 'hotelId'
   hotel: Hotel;
 
-  @Column({nullable: true })
+  @Column()
   hotelId: string;
 
-  @Column({nullable: true })
-  talentId: string;
+  @Column()
+  tenantId: string;
  
 }

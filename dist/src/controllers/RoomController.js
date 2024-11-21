@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoomController = void 0;
 const RoomService_1 = require("../services/RoomService");
@@ -51,11 +62,79 @@ class RoomController {
     static createRoom(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const room = yield RoomService_1.RoomService.createRoom(req.body);
-                res.status(201).json(room);
+                const { tenantId, hotelId, roomData } = req.body;
+                // console.log("RoomData", req.body)
+                // Validate tenantId
+                if (!tenantId) {
+                    return res.status(400).json({ statusCode: 400, message: 'Tenant Id is required' });
+                }
+                // Validate roomData is an array
+                if (!Array.isArray(roomData)) {
+                    return res.status(400).json({ statusCode: 400, message: 'Room data should be an array' });
+                }
+                // Check if the tenant exists by tenantId
+                const existingTenant = yield RoomService_1.RoomService.getRoomsByTenantId(tenantId);
+                if (!existingTenant) {
+                    return res.status(404).json({ statusCode: 404, message: 'Tenant not found' });
+                }
+                // Arrays to keep track of updated and new rooms
+                const updatedRooms = [];
+                const newRooms = [];
+                // Process each room in roomData
+                for (const [index, room] of roomData.entries()) {
+                    if (room && typeof room === 'object') {
+                        const { roomType, numRooms, currency, pricePerNight } = room, restOfRoom = __rest(room, ["roomType", "numRooms", "currency", "pricePerNight"]);
+                        // Validate required room fields
+                        if (!roomType) {
+                            return res.status(400).json({ statusCode: 400, message: `At Row ${index + 1}: Room type is required` });
+                        }
+                        if (typeof numRooms !== 'number' || numRooms <= 0) {
+                            return res.status(400).json({
+                                statusCode: 400,
+                                message: `At Row ${index + 1}: Number of rooms must be a positive integer`
+                            });
+                        }
+                        if (!currency) {
+                            return res.status(400).json({ statusCode: 400, message: `At Row ${index + 1}: Currency is required` });
+                        }
+                        if (typeof pricePerNight !== 'number' || pricePerNight <= 0) {
+                            return res.status(400).json({
+                                statusCode: 400,
+                                message: `At Row ${index + 1}: Price per night must be a positive number`
+                            });
+                        }
+                        // Check if the room already exists for this tenant and room type
+                        const existingRoom = yield RoomService_1.RoomService.getRoomByTenantIdAndRoomType(tenantId, roomType);
+                        if (existingRoom) {
+                            // Update the existing room
+                            yield RoomService_1.RoomService.update(existingRoom.id, Object.assign({ tenantId,
+                                hotelId,
+                                roomType,
+                                numRooms,
+                                currency,
+                                pricePerNight }, restOfRoom));
+                            updatedRooms.push(Object.assign(Object.assign({}, existingRoom), restOfRoom));
+                        }
+                        else {
+                            // Create a new room
+                            const newRoom = yield RoomService_1.RoomService.createRoom(Object.assign({ tenantId,
+                                hotelId,
+                                roomType,
+                                numRooms,
+                                currency,
+                                pricePerNight }, restOfRoom));
+                            newRooms.push(newRoom);
+                        }
+                    }
+                }
+                return res.status(201).json({
+                    message: 'Rooms processed successfully',
+                    data: { updatedRooms, newRooms },
+                });
             }
             catch (error) {
-                res.status(500).json({ error: 'Failed to create room' });
+                console.error('Error creating room:', error);
+                return res.status(500).json({ statusCode: 500, message: 'Failed to create room', error: error.message });
             }
         });
     }

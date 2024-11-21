@@ -26,7 +26,7 @@ AppDataSource.initialize()
 
     const app = express();
     const isLocal = process.env.NODE_ENV === 'development';
-    const port = process.env.PORT || 8100;
+    const port = process.env.PORT || 8400;
     const url = isLocal ? process.env.LOCAL_URL : process.env.REMOTE_URL;
 
     // Trust the proxy
@@ -36,6 +36,7 @@ AppDataSource.initialize()
     app.use(cors({
       origin: [
         'http://localhost:3000', // React
+        'http://localhost:3002', // React
         'http://localhost:8080', // Vue
         'http://localhost:4200', // Angular
         'http://localhost:5173',  // Vite
@@ -50,6 +51,7 @@ AppDataSource.initialize()
     app.options('*', cors({
       origin: [
         'http://localhost:3000',
+        'http://localhost:3002',
         'http://localhost:8080',
         'http://localhost:4200',
         'http://localhost:5173',

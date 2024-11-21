@@ -21,19 +21,19 @@ __decorate([
     __metadata("design:type", Number)
 ], Room.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
-    __metadata("design:type", String)
-], Room.prototype, "roomNumber", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Room.prototype, "roomType", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Room.prototype, "description", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Room.prototype, "numRooms", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2 }),
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Room.prototype, "currency", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Room.prototype, "pricePerNight", void 0);
 __decorate([
@@ -55,13 +55,13 @@ __decorate([
     __metadata("design:type", HotelEnitity_1.Hotel)
 ], Room.prototype, "hotel", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Room.prototype, "hotelId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Room.prototype, "talentId", void 0);
+], Room.prototype, "tenantId", void 0);
 exports.Room = Room = __decorate([
     (0, typeorm_1.Entity)()
 ], Room);
