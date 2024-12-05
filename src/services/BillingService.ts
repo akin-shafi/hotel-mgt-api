@@ -1,41 +1,34 @@
 // src/services/BillingService.ts
 import { AppDataSource } from '../data-source';
-import { Billing } from '../entities/BillingEntity';
+import { Billing, BillingStatus } from '../entities/BillingEntity';
 import { Reservation } from '../entities/ReservationEntity';
+import {ReservationStatus} from "../constants";
 
 const billingRepository = AppDataSource.getRepository(Billing);
 const reservationRepository = AppDataSource.getRepository(Reservation);
+
 export class BillingService {
 
 
-  async createBill(reservationId: number, amount: number, paymentMethod: string) {
-    const reservation = await reservationRepository.findOne({ where: { id: reservationId } });
-    if (!reservation) throw new Error('Reservation not found');
-  
-    const bill = billingRepository.create({
-      amount,
-      status: 'unpaid',
-      payment_method: paymentMethod,  // Ensure the correct property name
-      reservation,
-    });
-  
-    await billingRepository.save(bill);
-    return bill;
+  // BillingService
+  async createBill(billDetails: Partial<Billing>): Promise<Billing> {
+    const user = billingRepository.create(billDetails);
+    return billingRepository.save(user);
   }
-  
 
   async payBill(billId: number) {
-    const bill = await billingRepository.findOne({where: {id: billId}});
+    const bill = await billingRepository.findOne({ where: { id: billId } });
     if (!bill) throw new Error('Bill not found');
-
-    bill.status = 'paid';
+  
+    // Assign the enum value for "paid"
+    bill.status = BillingStatus.PAID;
     await billingRepository.save(bill);
-
-    // Optionally, update reservation status to "paid"
+  
+    // Optionally, update reservation status to "completed"
     const reservation = bill.reservation;
-    reservation.status = 'completed';
+    reservation.status = ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
     await reservationRepository.save(reservation);
-
+  
     return bill;
   }
 
@@ -46,5 +39,16 @@ export class BillingService {
   async getBillById(billId: number) {
     return await billingRepository.findOne({ where: { id: billId }, relations: ['reservation'] });
   }
+
+
+  async getBillByReservationId(reservationId: number) {
+    return await billingRepository.findOne({
+      where: { reservation: { id: reservationId } }, // Adjusted to query by `reservation.id`
+      relations: ["reservation"], // Ensure the relation is loaded
+    });
+  }
+  
+
+  
   
 }

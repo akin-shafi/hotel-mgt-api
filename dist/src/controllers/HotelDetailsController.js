@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HotelDetailsController = void 0;
-const HotelEnitity_1 = require("../entities/HotelEnitity");
+const HotelEntity_1 = require("../entities/HotelEntity");
 const data_source_1 = require("../data-source");
 class HotelDetailsController {
     // Get general hotel information
@@ -24,7 +24,7 @@ class HotelDetailsController {
                 if (isNaN(hotelId)) {
                     return res.status(400).json({ message: 'Invalid hotel ID' });
                 }
-                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel).findOne({
+                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel).findOne({
                     where: { id: hotelId }
                 });
                 if (!hotel) {
@@ -42,7 +42,7 @@ class HotelDetailsController {
     static updateHotelInfo(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel);
+                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel);
                 const hotel = yield hotelRepository.findOne({ where: { id: req.body.hotelId } });
                 if (!hotel) {
                     return res.status(404).json({ message: 'Hotel not found' });
@@ -75,7 +75,7 @@ class HotelDetailsController {
                 if (isNaN(hotelId)) {
                     return res.status(400).json({ message: 'Invalid hotel ID' });
                 }
-                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel).findOne({
+                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel).findOne({
                     where: { id: hotelId },
                     select: ['amenities']
                 });
@@ -94,7 +94,7 @@ class HotelDetailsController {
     static updateAmenities(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel);
+                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel);
                 const hotel = yield hotelRepository.findOne({ where: { id: req.body.hotelId } });
                 if (!hotel) {
                     return res.status(404).json({ message: 'Hotel not found' });
@@ -120,7 +120,7 @@ class HotelDetailsController {
                 if (isNaN(hotelId)) {
                     return res.status(400).json({ message: 'Invalid hotel ID' });
                 }
-                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel).findOne({
+                const hotel = yield data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel).findOne({
                     where: { id: hotelId },
                     select: ['policies']
                 });
@@ -139,7 +139,7 @@ class HotelDetailsController {
     static updatePolicies(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel);
+                const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel);
                 const hotel = yield hotelRepository.findOne({ where: { id: req.body.hotelId } });
                 if (!hotel) {
                     return res.status(404).json({ message: 'Hotel not found' });

@@ -9,50 +9,55 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Guest = void 0;
+exports.RoomType = void 0;
+// src/entities/RoomEntity.ts
 const typeorm_1 = require("typeorm");
-const ReservationEntity_1 = require("./ReservationEntity");
 const HotelEntity_1 = require("./HotelEntity");
-let Guest = class Guest {
+let RoomType = class RoomType {
 };
-exports.Guest = Guest;
+exports.RoomType = RoomType;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Guest.prototype, "id", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => HotelEntity_1.Hotel, (hotel) => hotel.guests),
-    (0, typeorm_1.JoinColumn)({ name: 'hotelId' }),
-    __metadata("design:type", HotelEntity_1.Hotel)
-], Guest.prototype, "hotel", void 0);
+], RoomType.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Guest.prototype, "fullName", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Guest.prototype, "email", void 0);
+], RoomType.prototype, "roomType", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Guest.prototype, "phone", void 0);
+], RoomType.prototype, "capacity", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], RoomType.prototype, "numRooms", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Guest.prototype, "address", void 0);
+], RoomType.prototype, "currency", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => ReservationEntity_1.Reservation, (reservation) => reservation.guest),
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], RoomType.prototype, "pricePerNight", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
     __metadata("design:type", Array)
-], Guest.prototype, "reservations", void 0);
+], RoomType.prototype, "amenities", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], Guest.prototype, "createdAt", void 0);
+    (0, typeorm_1.ManyToOne)(() => HotelEntity_1.Hotel, (hotel) => hotel.rooms),
+    (0, typeorm_1.JoinColumn)({ name: 'hotelId' }) // Corrected 'tenantId' to 'hotelId'
+    ,
+    __metadata("design:type", HotelEntity_1.Hotel)
+], RoomType.prototype, "hotel", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", Date)
-], Guest.prototype, "updatedAt", void 0);
-exports.Guest = Guest = __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], RoomType.prototype, "hotelId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], RoomType.prototype, "tenantId", void 0);
+exports.RoomType = RoomType = __decorate([
     (0, typeorm_1.Entity)()
-], Guest);
+], RoomType);

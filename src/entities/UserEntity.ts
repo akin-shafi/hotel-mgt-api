@@ -1,7 +1,7 @@
 import { UserRole } from '../constants';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { AccountStatus } from '../constants';
-import { Hotel } from './HotelEnitity';
+import { Hotel } from './HotelEntity';
 
 @Entity()
 export class User {
@@ -17,9 +17,8 @@ export class User {
   @Column({ nullable: true })
   tenantId: string; // Identify which tenant this user belongs to
 
-  @ManyToOne(() => Hotel, hotel => hotel.users)
-  @JoinColumn({ name: 'hotelId' })
-  hotel: Hotel;
+  @Column({ nullable: true })
+  hotelId: number;
 
   @Column({ unique: true })
   email: string;

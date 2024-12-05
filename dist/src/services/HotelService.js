@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HotelService = void 0;
 // hotelService.ts
 const data_source_1 = require("../data-source");
-const HotelEnitity_1 = require("../entities/HotelEnitity");
-const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEnitity_1.Hotel);
+const HotelEntity_1 = require("../entities/HotelEntity");
+const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel);
 class HotelService {
     // Create a new hotel
     create(hotelData) {

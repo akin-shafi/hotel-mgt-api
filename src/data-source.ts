@@ -7,8 +7,9 @@ dotenv.config();
 // Import all entities
 import { User } from './entities/UserEntity';
 import { Guest } from './entities/GuestEntity';
-import { Hotel } from './entities/HotelEnitity'; // Add the Hotel entity here
+import { Hotel } from './entities/HotelEntity'; // Add the Hotel entity here
 import { Room } from './entities/RoomEntity';
+import { RoomType } from './entities/RoomTypeEntity';
 import { Reservation } from './entities/ReservationEntity';
 import { HousekeepingTask } from './entities/HousekeepingTaskEntity';
 import { Billing } from './entities/BillingEntity';
@@ -21,10 +22,11 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'admin',
   database: process.env.DB_DATABASE || 'hotel_mgt_db',
   entities: [
+    Hotel,
     User,
     Guest,
-    Hotel,
     Room,
+    RoomType,
     Reservation,  // Make sure this is included
     HousekeepingTask,
     Billing

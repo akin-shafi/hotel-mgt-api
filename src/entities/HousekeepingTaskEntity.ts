@@ -7,6 +7,9 @@ export class HousekeepingTask {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({nullable: true})
+  hotelId: string;
+
   @Column({ type: 'varchar', length: 100 })
   description: string;
 

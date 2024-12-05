@@ -1,7 +1,7 @@
 "use strict";
 // src/constants.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
+exports.ReservationStatus = exports.ReservationType = exports.Activity = exports.MaintenanceStatus = exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["Admin"] = "admin";
@@ -25,3 +25,35 @@ var OnboardingStatus;
     OnboardingStatus["OnboardingCompleted"] = "Onboarding Completed";
     OnboardingStatus["Approved"] = "Approved";
 })(OnboardingStatus || (exports.OnboardingStatus = OnboardingStatus = {}));
+var MaintenanceStatus;
+(function (MaintenanceStatus) {
+    MaintenanceStatus["CLEAN"] = "clean";
+    MaintenanceStatus["DIRTY"] = "dirty";
+    MaintenanceStatus["UNDER_MAINTENANCE"] = "under_maintenance";
+    MaintenanceStatus["OUT_OF_ORDER"] = "out_of_order";
+    MaintenanceStatus["SCHEDULED_FOR_CLEANING"] = "scheduled_for_cleaning";
+    MaintenanceStatus["SCHEDULED_FOR_MAINTENANCE"] = "scheduled_for_maintenance";
+    MaintenanceStatus["IN_USE"] = "in_use";
+})(MaintenanceStatus || (exports.MaintenanceStatus = MaintenanceStatus = {}));
+// Enum for reservation status
+var Activity;
+(function (Activity) {
+    Activity["ARRIVAL"] = "Arrival";
+    Activity["CHECK_IN"] = "Check-in";
+    Activity["CHECK_OUT"] = "Check-out";
+    Activity["DUE_OUT"] = "Due-out";
+    Activity["BOOKINGS"] = "Booking";
+    Activity["CANCELLATION"] = "Cancelled";
+})(Activity || (exports.Activity = Activity = {}));
+// Enum for reservation type
+var ReservationType;
+(function (ReservationType) {
+    ReservationType["WALK_IN"] = "Walk-in";
+    ReservationType["ONLINE_BOOKING"] = "Online-Booking";
+})(ReservationType || (exports.ReservationType = ReservationType = {}));
+var ReservationStatus;
+(function (ReservationStatus) {
+    ReservationStatus["PENDING"] = "pending";
+    ReservationStatus["CONFIRMED"] = "confirmed";
+    ReservationStatus["CANCELLED"] = "cancelled";
+})(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));

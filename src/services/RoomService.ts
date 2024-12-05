@@ -5,13 +5,13 @@ import { Room } from '../entities/RoomEntity';
 const roomRepository = AppDataSource.getRepository(Room);
 export class RoomService {
 
-  static async getRoomByTenantIdAndRoomType(tenantId: string, roomType: string) {
+  static async getRoomByHotelIdAndRoomName(hotelId: number, roomName: string) {
     try {
         // Find educational details by both applicationNo and courseOfStudy
         return await roomRepository.findOne({
             where: {
-              tenantId,
-              roomType
+              hotelId,
+              roomName
             }
         });
     } catch (error) {
@@ -24,13 +24,13 @@ export class RoomService {
     return await AppDataSource.getRepository(Room).find();
   }
 
-  static async getRoomsByTenantId(tenantId: string) {
+  static async getRoomsByhotelId(hotelId: number) {
     try {
       const roomRepository = AppDataSource.getRepository(Room);
 
       // Fetch rooms by talentId
       const rooms = await roomRepository.find({
-        where: { tenantId }, // Assuming "hotelId" exists in your Room entity
+        where: { hotelId }, // Assuming "hotelId" exists in your Room entity
       });
 
       return rooms;

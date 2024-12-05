@@ -1,5 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Reservation } from './ReservationEntity';
+
+// Enum for the billing status
+export enum BillingStatus {
+  UNPAID = 'unpaid',
+  PAID = 'paid',
+  REFUNDED = 'refunded',
+}
+
+// Enum for the payment method
+export enum PaymentMethod {
+  CREDIT_CARD = 'credit_card',
+  PAYPAL = 'paypal',
+  CASH = 'cash',
+}
 
 @Entity()
 export class Billing {
@@ -9,18 +23,28 @@ export class Billing {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ type: 'varchar', length: 20 })
-  status: string; // e.g., paid, unpaid, refunded
+  @Column({ type: 'enum', enum: BillingStatus, default: BillingStatus.UNPAID })
+  status: BillingStatus;
 
-  @Column()
-  payment_method: string;
+  @Column({ type: 'enum', enum: PaymentMethod })
+  payment_method: PaymentMethod;
 
-  @ManyToOne(() => Reservation, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Reservation, (reservation) => reservation.billing)
+  @JoinColumn({ name: 'reservationId' })
   reservation: Reservation;
 
   @CreateDateColumn()
-  created_at: Date; // Changed createdAt to created_at
+  created_at: Date;
 
   @UpdateDateColumn()
-  updated_at: Date; // Changed updatedAt to updated_at
+  updated_at: Date;
+
+  @Column({ type: 'date', nullable: true })
+  due_date: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  billing_address: string;
+
+  @Column({ type: 'date', nullable: true })
+  payment_date: Date;
 }

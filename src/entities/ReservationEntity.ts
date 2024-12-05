@@ -1,12 +1,41 @@
-// src/entities/ReservationEntity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Guest } from './GuestEntity';
-import { Room } from './RoomEntity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  JoinColumn,
+} from 'typeorm';
+import { Billing } from './BillingEntity'; // Import Billing entity
+import { Hotel } from './HotelEntity'; // Import Hotel entity
+import { Guest } from './GuestEntity'; // Import Guest entity
+import { Room } from './RoomEntity'; // Import Room entity
+import { ReservationType, Activity, ReservationStatus } from "../constants"
 
-@Entity()
+
+
+@Entity('reservations')
 export class Reservation {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @ManyToOne(() => Guest, (guest) => guest.reservations, { nullable: false, eager: true })
+  @JoinColumn({ name: 'guestId' })
+  guest: Guest;
+
+  @Column({ nullable: true })
+  adults: number;
+
+  @Column({ nullable: true })
+  children: number;
+
+  @Column({ nullable: true })
+  roomName: string;
+
+  @Column({ nullable: true })
+  beds: string;
 
   @Column({ type: 'date' })
   checkInDate: Date;
@@ -14,21 +43,50 @@ export class Reservation {
   @Column({ type: 'date' })
   checkOutDate: Date;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  totalAmount: number;
+  @Column({ type: 'enum', enum: ReservationType })
+  reservationType: ReservationType;
 
-  @Column({ type: 'varchar', length: 20, default: 'pending' })
-  status: string;
+  @Column({ type: 'enum', enum: ReservationStatus })
+  status: ReservationStatus;
 
-  @ManyToOne(() => Guest, (guest) => guest.reservations, { onDelete: 'CASCADE' })
-  guest: Guest;
+  @Column({ type: 'enum', enum: Activity })
+  // @Column({ nullable: true })
+  activity: Activity;
 
-  @ManyToOne(() => Room, { onDelete: 'SET NULL' })
-  room: Room;
+  @Column({ type: 'boolean', default: false })
+  paymentStatus: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  confirmed: boolean;
+
+  @Column({ nullable: true })
+  createdBy: string;
+
+  @Column({ nullable: true })
+  role: string;
+
+  @OneToMany(() => Billing, (billing) => billing.reservation)
+  billing: Billing[];
+
+  @ManyToOne(() => Hotel, (hotel) => hotel.reservations, { nullable: false })
+  @JoinColumn({ name: 'hotelId' })
+  hotel: Hotel;
+
+  @Column({ nullable: true })
+  hotelId: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column('text', { array: true, nullable: true })
+  specialRequest: string[];
+
+  @Column({ nullable: true })
+  notes: string;
+
+  @Column({ type: 'date', nullable: true })
+  confirmedDate: Date;
 }

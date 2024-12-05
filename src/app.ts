@@ -7,6 +7,7 @@ import rateLimiter from './middlewares/rateLimiter';
 import userRoutes from './routes/UserRoutes';
 import userPrivateRoutes from './routes/UsersPrivateRoutes';
 import roomRoutes from './routes/RoomRoutes';
+import roomTypeRoutes from './routes/RoomTypeRoutes';
 import hotelRoutes from './routes/HotelRoutes';
 import reservationRoutes from './routes/ReservationRoutes';
 import guestRoutes from './routes/GuestRoutes';
@@ -80,12 +81,13 @@ AppDataSource.initialize()
     app.use(`/users`, userRoutes);
     app.use(`/auth/users`, userPrivateRoutes);
     app.use(`/rooms`, roomRoutes);
+    app.use(`/room-type`, roomTypeRoutes);
     app.use(`/property-info`, hotelRoutes);
     app.use(`/property-details`, hotelRoutes);
-    app.use('/reservations', reservationRoutes);
+    app.use('/api/reservations', reservationRoutes);
     app.use('/guests', guestRoutes);
     app.use('/housekeeping-tasks', housekeepingTaskRoutes);
-    app.use('/bills', billingRoutes);
+    app.use('/api/billing', billingRoutes);
     // Swagger setup
     app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 

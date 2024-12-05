@@ -1,22 +1,26 @@
-// src/entities/GuestEntity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Reservation } from './ReservationEntity';
+import { Hotel } from './HotelEntity';
 
 @Entity()
 export class Guest {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @ManyToOne(() => Hotel, (hotel) => hotel.guests)
+  @JoinColumn({ name: 'hotelId' })
+  hotel: Hotel;
+
+  @Column()
   fullName: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ nullable: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 15 })
+  @Column()
   phone: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ nullable: true })
   address: string;
 
   @OneToMany(() => Reservation, (reservation) => reservation.guest)

@@ -1,44 +1,16 @@
+"use strict";
 // src/routes/RoomRoutes.ts
-
-import { Router } from 'express';
-import  {RoomController}  from '../controllers/RoomController';
-
-const router = Router();
-
-
-/**
- * @swagger
- * /rooms/maintenance-options:
- *   get:
- *     summary: Get maintenance status options
- *     description: Fetch the available options for room maintenance status from the enum.
- *     tags: [Rooms]
- *     responses:
- *       200:
- *         description: A list of maintenance status options.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   label:
- *                     type: string
- *                   value:
- *                     type: string
- *       500:
- *         description: Server error.
- */
-router.get('/maintenance-options', RoomController.getMaintenanceStatus);
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const RoomTypeController_1 = require("../controllers/RoomTypeController");
+const router = (0, express_1.Router)();
 // /**
 //  * @swagger
-//  * /rooms:
+//  * /room-type:
 //  *   get:
-//  *     summary: Get all rooms
+//  *     summary: Get all room Type
 //  *     description: Retrieves a list of all rooms with details such as room type, status, and price.
-//  *     tags: [Rooms]
+//  *     tags: [Room Type]
 //  *     responses:
 //  *       200:
 //  *         description: List of rooms.
@@ -51,15 +23,43 @@ router.get('/maintenance-options', RoomController.getMaintenanceStatus);
 //  *       500:
 //  *         description: Server error.
 //  */
-// router.get('/', RoomController.getAllRooms);
-
+// router.get('/', RoomTypeController.getAllRoomType);
 /**
  * @swagger
- * /rooms/{id}:
+ * /room-type/{hotelId}/types:
  *   get:
- *     summary: Get a room by ID
+ *     summary: Get all room types for a specific hotel
+ *     description: Retrieves a list of all unique room types for a given hotel.
+ *     tags: [Room Type]
+ *     parameters:
+ *       - in: path
+ *         name: hotelId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the hotel
+ *     responses:
+ *       200:
+ *         description: List of room types for the hotel.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *       400:
+ *         description: Hotel ID is required.
+ *       500:
+ *         description: Server error.
+ */
+router.get('/:hotelId/types', RoomTypeController_1.RoomTypeController.getRoomTypesByHotel);
+/**
+ * @swagger
+ * /room-type/{id}:
+ *   get:
+ *     summary: Get a room type by ID
  *     description: Retrieves details of a specific room by its ID.
- *     tags: [Rooms]
+ *     tags: [Room Type]
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,15 +79,14 @@ router.get('/maintenance-options', RoomController.getMaintenanceStatus);
  *       500:
  *         description: Server error.
  */
-router.get('/:id', RoomController.getRoomById);
-
+router.get('/:id', RoomTypeController_1.RoomTypeController.getRoomTypeById);
 /**
  * @swagger
- * /rooms/hotels/{hotelId}:
+ * /room-type/hotels/{hotelId}:
  *   get:
- *     summary: Get rooms by hotel ID
+ *     summary: Get room type data by hotel ID
  *     description: Retrieves all rooms associated with a specific hotel by its ID.
- *     tags: [Rooms]
+ *     tags: [Room Type]
  *     parameters:
  *       - in: path
  *         name: hotelId
@@ -108,92 +107,14 @@ router.get('/:id', RoomController.getRoomById);
  *       500:
  *         description: Server error.
  */
-router.get('/hotels/:hotelId', RoomController.getRoomsByhotelId);
-
+router.get('/hotels/:hotelId', RoomTypeController_1.RoomTypeController.getRoomTypeDataByHotelId);
 /**
  * @swagger
- * /rooms/{hotelId}/with-prices:
- *   get:
- *     summary: Get rooms and their prices by hotel ID
- *     description: Retrieves all rooms and their prices for a specific hotel by its ID.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: hotelId
- *         required: true
- *         schema:
- *           type: integer
- *         description: The ID of the hotel to retrieve rooms and prices for.
- *     responses:
- *       200:
- *         description: List of rooms with prices.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     description: The unique identifier of the room.
- *                   name:
- *                     type: string
- *                     description: The name of the room.
- *                   roomTypeId:
- *                     type: integer
- *                     description: The ID of the room type.
- *                   hotelId:
- *                     type: integer
- *                     description: The ID of the hotel.
- *                   price:
- *                     type: number
- *                     description: The price of the room based on its type.
- *       400:
- *         description: Invalid hotel ID supplied.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid hotel ID.
- *       404:
- *         description: No rooms found for the specified hotel.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: No rooms found for this hotel.
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Server error.
- *                 error:
- *                   type: string
- *                   description: Detailed error message.
- */
-router.get('/:hotelId/with-prices', RoomController.getRoomAndPriceByHotelId);
-
-
-
-/**
- * @swagger
- * /rooms:
+ * /room-type:
  *   post:
- *     summary: Create a new room
+ *     summary: Create a new room type
  *     description: Adds a new room with details such as room type, availability, price, and amenities.
- *     tags: [Rooms]
+ *     tags: [Room Type]
  *     requestBody:
  *       required: true
  *       content:
@@ -247,17 +168,14 @@ router.get('/:hotelId/with-prices', RoomController.getRoomAndPriceByHotelId);
  *       500:
  *         description: Server error.
  */
-router.post('/', RoomController.createRoom);
-
-
-
+router.post('/', RoomTypeController_1.RoomTypeController.createRoomType);
 /**
  * @swagger
- * /rooms/{id}:
+ * /room-type/{id}:
  *   put:
  *     summary: Update room details
  *     description: Updates details of an existing room by its ID.
- *     tags: [Rooms]
+ *     tags: [Room Type]
  *     parameters:
  *       - in: path
  *         name: id
@@ -298,15 +216,14 @@ router.post('/', RoomController.createRoom);
  *       500:
  *         description: Server error.
  */
-router.put('/:id', RoomController.updateRoom);
-
+router.put('/:id', RoomTypeController_1.RoomTypeController.updateRoomType);
 /**
  * @swagger
- * /rooms/{id}:
+ * /room-type/{id}:
  *   delete:
  *     summary: Delete a room
  *     description: Removes a room from the system by its ID.
- *     tags: [Rooms]
+ *     tags: [Room Type]
  *     parameters:
  *       - in: path
  *         name: id
@@ -322,8 +239,5 @@ router.put('/:id', RoomController.updateRoom);
  *       500:
  *         description: Server error.
  */
-router.delete('/:id', RoomController.deleteRoom);
-
-
-
-export default router;
+router.delete('/:id', RoomTypeController_1.RoomTypeController.deleteRoomType);
+exports.default = router;

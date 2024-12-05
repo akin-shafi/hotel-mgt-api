@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Hotel = void 0;
 const typeorm_1 = require("typeorm");
 const UserEntity_1 = require("./UserEntity");
+const ReservationEntity_1 = require("./ReservationEntity"); // Correct import path for Reservation
 let Hotel = class Hotel {
 };
 exports.Hotel = Hotel;
@@ -56,7 +57,7 @@ __decorate([
     __metadata("design:type", String)
 ], Hotel.prototype, "tenantId", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => UserEntity_1.User, user => user.hotel),
+    (0, typeorm_1.OneToMany)(() => UserEntity_1.User, (user) => user.hotel),
     __metadata("design:type", Array)
 ], Hotel.prototype, "users", void 0);
 __decorate([
@@ -68,13 +69,17 @@ __decorate([
     __metadata("design:type", Object)
 ], Hotel.prototype, "policies", void 0);
 __decorate([
-    (0, typeorm_1.Column)('simple-array', { nullable: true }),
+    (0, typeorm_1.Column)("simple-array", { nullable: true }),
     __metadata("design:type", Array)
 ], Hotel.prototype, "amenities", void 0);
 __decorate([
-    (0, typeorm_1.Column)('simple-array', { nullable: true }),
+    (0, typeorm_1.Column)("simple-array", { nullable: true }),
     __metadata("design:type", Array)
 ], Hotel.prototype, "rooms", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => ReservationEntity_1.Reservation, (reservations) => reservations.hotel),
+    __metadata("design:type", Array)
+], Hotel.prototype, "reservations", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
@@ -84,5 +89,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Hotel.prototype, "updatedAt", void 0);
 exports.Hotel = Hotel = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)() // Added table name
 ], Hotel);

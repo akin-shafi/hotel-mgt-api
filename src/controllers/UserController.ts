@@ -533,6 +533,7 @@ class UserController {
                 resetPassword: user.resetPassword,
                 onboardingStep: user.onboardingStep,
                 tenantId: user.tenantId,
+                hotelId: user.hotelId,
                 profilePicture: user?.profilePicture,
             },
         });

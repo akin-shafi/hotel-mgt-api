@@ -12,6 +12,7 @@ const rateLimiter_1 = __importDefault(require("./middlewares/rateLimiter"));
 const UserRoutes_1 = __importDefault(require("./routes/UserRoutes"));
 const UsersPrivateRoutes_1 = __importDefault(require("./routes/UsersPrivateRoutes"));
 const RoomRoutes_1 = __importDefault(require("./routes/RoomRoutes"));
+const RoomTypeRoutes_1 = __importDefault(require("./routes/RoomTypeRoutes"));
 const HotelRoutes_1 = __importDefault(require("./routes/HotelRoutes"));
 const ReservationRoutes_1 = __importDefault(require("./routes/ReservationRoutes"));
 const GuestRoutes_1 = __importDefault(require("./routes/GuestRoutes"));
@@ -74,12 +75,13 @@ data_source_1.AppDataSource.initialize()
     app.use(`/users`, UserRoutes_1.default);
     app.use(`/auth/users`, UsersPrivateRoutes_1.default);
     app.use(`/rooms`, RoomRoutes_1.default);
+    app.use(`/room-type`, RoomTypeRoutes_1.default);
     app.use(`/property-info`, HotelRoutes_1.default);
     app.use(`/property-details`, HotelRoutes_1.default);
-    app.use('/reservations', ReservationRoutes_1.default);
+    app.use('/api/reservations', ReservationRoutes_1.default);
     app.use('/guests', GuestRoutes_1.default);
     app.use('/housekeeping-tasks', HousekeepingTaskRoutes_1.default);
-    app.use('/bills', BillingRoutes_1.default);
+    app.use('/api/billing', BillingRoutes_1.default);
     // Swagger setup
     app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec));
     // Error logging with Winston

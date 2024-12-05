@@ -13,7 +13,6 @@ exports.User = void 0;
 const constants_1 = require("../constants");
 const typeorm_1 = require("typeorm");
 const constants_2 = require("../constants");
-const HotelEnitity_1 = require("./HotelEnitity");
 let User = class User {
 };
 exports.User = User;
@@ -34,10 +33,9 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "tenantId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => HotelEnitity_1.Hotel, hotel => hotel.users),
-    (0, typeorm_1.JoinColumn)({ name: 'hotelId' }),
-    __metadata("design:type", HotelEnitity_1.Hotel)
-], User.prototype, "hotel", void 0);
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "hotelId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)

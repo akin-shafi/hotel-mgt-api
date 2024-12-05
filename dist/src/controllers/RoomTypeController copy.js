@@ -21,15 +21,13 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoomController = void 0;
-const RoomService_1 = require("../services/RoomService");
-const constants_1 = require("../constants");
 const RoomTypeService_1 = require("../services/RoomTypeService");
-const roomService = new RoomService_1.RoomService();
+const roomService = new RoomTypeService_1.RoomTypeService();
 class RoomController {
     static getAllRooms(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const rooms = yield RoomService_1.RoomService.getAllRooms();
+                const rooms = yield RoomTypeService_1.RoomTypeService.getAllRooms();
                 res.json(rooms);
             }
             catch (error) {
@@ -40,7 +38,7 @@ class RoomController {
     static getRoomById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const room = yield RoomService_1.RoomService.getRoomById(Number(req.params.id));
+                const room = yield RoomTypeService_1.RoomTypeService.getRoomById(Number(req.params.id));
                 room ? res.json(room) : res.status(404).json({ error: 'Room not found' });
             }
             catch (error) {
@@ -48,38 +46,16 @@ class RoomController {
             }
         });
     }
-    static getRoomsByhotelId(req, res) {
+    static getRoomsByTenantId(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { hotelId } = req.params;
-                const rooms = yield RoomService_1.RoomService.getRoomsByhotelId(parseInt(hotelId));
+                const { tenantId } = req.params;
+                const rooms = yield RoomTypeService_1.RoomTypeService.getRoomsByTenantId(tenantId);
                 return rooms ? res.status(200).json(rooms) : res.status(200).json([]);
             }
             catch (error) {
                 console.error('Error retrieving hotel by tenantId:', error);
                 return res.status(500).json({ message: 'Server error', error: error.message });
-            }
-        });
-    }
-    static getRoomAndPriceByHotelId(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { hotelId } = req.params;
-                // Fetch rooms by hotel ID
-                const rooms = yield RoomService_1.RoomService.getRoomsByhotelId(parseInt(hotelId));
-                if (!rooms || rooms.length === 0) {
-                    return res.status(200).json([]);
-                }
-                // Enrich rooms with prices from RoomTypeService
-                const enrichedRooms = yield Promise.all(rooms.map((room) => __awaiter(this, void 0, void 0, function* () {
-                    const roomType = yield RoomTypeService_1.RoomTypeService.getRoomByType(room.roomType);
-                    return Object.assign(Object.assign({}, room), { capacity: roomType ? roomType.capacity : null, price: roomType ? roomType.pricePerNight : null });
-                })));
-                return res.status(200).json(enrichedRooms);
-            }
-            catch (error) {
-                console.error("Error retrieving rooms by hotelId:", error);
-                return res.status(500).json({ message: "Server error", error: error.message });
             }
         });
     }
@@ -97,7 +73,7 @@ class RoomController {
                     return res.status(400).json({ statusCode: 400, message: 'Room data should be an array' });
                 }
                 // Check if the tenant exists by tenantId
-                const existingTenant = yield RoomService_1.RoomService.getRoomsByhotelId(hotelId);
+                const existingTenant = yield RoomTypeService_1.RoomTypeService.getRoomsByTenantId(tenantId);
                 if (!existingTenant) {
                     return res.status(404).json({ statusCode: 404, message: 'Tenant not found' });
                 }
@@ -107,32 +83,46 @@ class RoomController {
                 // Process each room in roomData
                 for (const [index, room] of roomData.entries()) {
                     if (room && typeof room === 'object') {
-                        const { roomName, isAvailable = true, maintenanceStatus = 'clean' } = room, restOfRoom = __rest(room, ["roomName", "isAvailable", "maintenanceStatus"]);
+                        const { roomType, numRooms, currency, pricePerNight } = room, restOfRoom = __rest(room, ["roomType", "numRooms", "currency", "pricePerNight"]);
                         // Validate required room fields
-                        if (!roomName) {
+                        if (!roomType) {
+                            return res.status(400).json({ statusCode: 400, message: `At Row ${index + 1}: Room type is required` });
+                        }
+                        if (typeof numRooms !== 'number' || numRooms <= 0) {
                             return res.status(400).json({
                                 statusCode: 400,
-                                message: `At Row ${index + 1}: Room name is required`,
+                                message: `At Row ${index + 1}: Number of rooms must be a positive integer`
                             });
                         }
-                        // Check if the room already exists for this tenant and roomName
-                        const existingRoom = yield RoomService_1.RoomService.getRoomByHotelIdAndRoomName(hotelId, roomName);
+                        if (!currency) {
+                            return res.status(400).json({ statusCode: 400, message: `At Row ${index + 1}: Currency is required` });
+                        }
+                        if (typeof pricePerNight !== 'number' || pricePerNight <= 0) {
+                            return res.status(400).json({
+                                statusCode: 400,
+                                message: `At Row ${index + 1}: Price per night must be a positive number`
+                            });
+                        }
+                        // Check if the room already exists for this tenant and room type
+                        const existingRoom = yield RoomTypeService_1.RoomTypeService.getRoomByTenantIdAndRoomType(tenantId, roomType);
                         if (existingRoom) {
                             // Update the existing room
-                            yield RoomService_1.RoomService.update(existingRoom.id, Object.assign({ tenantId,
+                            yield RoomTypeService_1.RoomTypeService.update(existingRoom.id, Object.assign({ tenantId,
                                 hotelId,
-                                roomName,
-                                isAvailable,
-                                maintenanceStatus }, restOfRoom));
+                                roomType,
+                                numRooms,
+                                currency,
+                                pricePerNight }, restOfRoom));
                             updatedRooms.push(Object.assign(Object.assign({}, existingRoom), restOfRoom));
                         }
                         else {
                             // Create a new room
-                            const newRoom = yield RoomService_1.RoomService.createRoom(Object.assign({ tenantId,
+                            const newRoom = yield RoomTypeService_1.RoomTypeService.createRoom(Object.assign({ tenantId,
                                 hotelId,
-                                roomName,
-                                isAvailable,
-                                maintenanceStatus }, restOfRoom));
+                                roomType,
+                                numRooms,
+                                currency,
+                                pricePerNight }, restOfRoom));
                             newRooms.push(newRoom);
                         }
                     }
@@ -144,18 +134,14 @@ class RoomController {
             }
             catch (error) {
                 console.error('Error creating room:', error);
-                return res.status(500).json({
-                    statusCode: 500,
-                    message: 'Failed to create room',
-                    error: error.message,
-                });
+                return res.status(500).json({ statusCode: 500, message: 'Failed to create room', error: error.message });
             }
         });
     }
     static updateRoom(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const room = yield RoomService_1.RoomService.updateRoom(Number(req.params.id), req.body);
+                const room = yield RoomTypeService_1.RoomTypeService.updateRoom(Number(req.params.id), req.body);
                 room ? res.json(room) : res.status(404).json({ error: 'Room not found' });
             }
             catch (error) {
@@ -166,30 +152,13 @@ class RoomController {
     static deleteRoom(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const success = yield RoomService_1.RoomService.deleteRoom(Number(req.params.id));
+                const success = yield RoomTypeService_1.RoomTypeService.deleteRoom(Number(req.params.id));
                 success ? res.status(204).end() : res.status(404).json({ error: 'Room not found' });
             }
             catch (error) {
                 res.status(500).json({ error: 'Failed to delete room' });
             }
         });
-    }
-    static getMaintenanceStatus(req, res) {
-        try {
-            // Convert enum to an array of objects with label and value
-            const maintenanceStatuses = Object.keys(constants_1.MaintenanceStatus).map(key => {
-                return {
-                    label: key.replace(/_/g, ' ').toUpperCase(), // Format the label (e.g., UNDER_MAINTENANCE -> Under Maintenance)
-                    value: constants_1.MaintenanceStatus[key] // Get the enum value
-                };
-            });
-            // Send a response with the maintenance statuses
-            res.status(200).json(maintenanceStatuses);
-        }
-        catch (error) {
-            // Handle any errors and send a server error response
-            res.status(500).json({ message: 'Error fetching maintenance statuses' });
-        }
     }
 }
 exports.RoomController = RoomController;

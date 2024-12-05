@@ -1,6 +1,6 @@
 // src/controllers/HotelDetailsController.ts
 import { Request, Response } from 'express';
-import { Hotel } from '../entities/HotelEnitity';
+import { Hotel } from '../entities/HotelEntity';
 import { AppDataSource } from '../data-source';
 
 export class HotelDetailsController {

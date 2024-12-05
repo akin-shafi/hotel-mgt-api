@@ -46,14 +46,6 @@ const swaggerOptions = {
                 description: "Endpoints for managing guest details and reservations"
             },
             {
-                name: "Room Management",
-                description: "Endpoints for managing hotel rooms and room availability"
-            },
-            {
-                name: "Reservation Management",
-                description: "Endpoints for handling reservations and booking details"
-            },
-            {
                 name: "Billing",
                 description: "Endpoints for managing billing and payments"
             },
@@ -70,17 +62,29 @@ const swaggerOptions = {
                 description: "Endpoints for managing the types and availability of rooms in the hotel"
             },
             {
-                name: "Payment",
-                description: "Endpoints for payment processing and transactions"
+                name: "Room Type",
+                description: "Endpoints for managing the types, price and numbers of rooms in the hotel"
             },
             {
-                name: "Service Requests",
-                description: "Endpoints for managing customer service requests"
+                name: "Reservations",
+                description: "Endpoints for handling reservations and booking details"
             },
-            {
-                name: "Feedback",
-                description: "Endpoints for guest feedback and reviews"
-            },
+            // {
+            //   name: "Room Management",
+            //   description: "Endpoints for managing hotel rooms and room availability"
+            // },
+            // {
+            //   name: "Payment",
+            //   description: "Endpoints for payment processing and transactions"
+            // },
+            // {
+            //   name: "Service Requests",
+            //   description: "Endpoints for managing customer service requests"
+            // },
+            // {
+            //   name: "Feedback",
+            //   description: "Endpoints for guest feedback and reviews"
+            // },
         ]
     },
     apis: ['./src/routes/*.ts', './src/controllers/*.ts'], // Paths to files with OpenAPI annotations

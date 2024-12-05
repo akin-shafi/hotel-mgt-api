@@ -9,20 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomService = void 0;
+exports.RoomTypeService = void 0;
 // src/services/RoomService.ts
 const data_source_1 = require("../data-source");
-const RoomEntity_1 = require("../entities/RoomEntity");
-const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
-class RoomService {
-    static getRoomByHotelIdAndRoomName(hotelId, roomName) {
+const RoomTypeEntity_1 = require("../entities/RoomTypeEntity");
+const roomRepository = data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType);
+class RoomTypeService {
+    static getRoomByTenantIdAndRoomType(tenantId, roomType) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Find educational details by both applicationNo and courseOfStudy
                 return yield roomRepository.findOne({
                     where: {
-                        hotelId,
-                        roomName
+                        tenantId,
+                        roomType
                     }
                 });
             }
@@ -33,16 +33,16 @@ class RoomService {
     }
     static getAllRooms() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).find();
+            return yield data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType).find();
         });
     }
-    static getRoomsByhotelId(hotelId) {
+    static getRoomsByTenantId(tenantId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
+                const roomRepository = data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType);
                 // Fetch rooms by talentId
                 const rooms = yield roomRepository.find({
-                    where: { hotelId }, // Assuming "hotelId" exists in your Room entity
+                    where: { tenantId }, // Assuming "hotelId" exists in your Room entity
                 });
                 return rooms;
             }
@@ -54,7 +54,7 @@ class RoomService {
     }
     static getRoomById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).findOneBy({ id });
+            return yield data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType).findOneBy({ id });
         });
     }
     static createRoom(data) {
@@ -70,8 +70,8 @@ class RoomService {
     }
     static updateRoom(id, roomData) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).update({ id }, roomData);
-            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).findOneBy({ id });
+            yield data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType).update({ id }, roomData);
+            return yield data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType).findOneBy({ id });
         });
     }
     static update(id, data) {
@@ -87,9 +87,9 @@ class RoomService {
     }
     static deleteRoom(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const deleteResult = yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).delete({ id });
+            const deleteResult = yield data_source_1.AppDataSource.getRepository(RoomTypeEntity_1.RoomType).delete({ id });
             return deleteResult.affected > 0;
         });
     }
 }
-exports.RoomService = RoomService;
+exports.RoomTypeService = RoomTypeService;

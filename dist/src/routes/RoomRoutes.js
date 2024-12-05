@@ -6,24 +6,49 @@ const RoomController_1 = require("../controllers/RoomController");
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /rooms:
+ * /rooms/maintenance-options:
  *   get:
- *     summary: Get all rooms
- *     description: Retrieves a list of all rooms with details such as room type, status, and price.
+ *     summary: Get maintenance status options
+ *     description: Fetch the available options for room maintenance status from the enum.
  *     tags: [Rooms]
  *     responses:
  *       200:
- *         description: List of rooms.
+ *         description: A list of maintenance status options.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Room'
+ *                 type: object
+ *                 properties:
+ *                   label:
+ *                     type: string
+ *                   value:
+ *                     type: string
  *       500:
  *         description: Server error.
  */
-router.get('/', RoomController_1.RoomController.getAllRooms);
+router.get('/maintenance-options', RoomController_1.RoomController.getMaintenanceStatus);
+// /**
+//  * @swagger
+//  * /rooms:
+//  *   get:
+//  *     summary: Get all rooms
+//  *     description: Retrieves a list of all rooms with details such as room type, status, and price.
+//  *     tags: [Rooms]
+//  *     responses:
+//  *       200:
+//  *         description: List of rooms.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: array
+//  *               items:
+//  *                 $ref: '#/components/schemas/Room'
+//  *       500:
+//  *         description: Server error.
+//  */
+// router.get('/', RoomController.getAllRooms);
 /**
  * @swagger
  * /rooms/{id}:
@@ -53,14 +78,14 @@ router.get('/', RoomController_1.RoomController.getAllRooms);
 router.get('/:id', RoomController_1.RoomController.getRoomById);
 /**
  * @swagger
- * /rooms/hotels/{tenantId}:
+ * /rooms/hotels/{hotelId}:
  *   get:
  *     summary: Get rooms by hotel ID
  *     description: Retrieves all rooms associated with a specific hotel by its ID.
  *     tags: [Rooms]
  *     parameters:
  *       - in: path
- *         name: tenantId
+ *         name: hotelId
  *         required: true
  *         schema:
  *           type: string
@@ -78,7 +103,81 @@ router.get('/:id', RoomController_1.RoomController.getRoomById);
  *       500:
  *         description: Server error.
  */
-router.get('/hotels/:tenantId', RoomController_1.RoomController.getRoomsByTenantId);
+router.get('/hotels/:hotelId', RoomController_1.RoomController.getRoomsByhotelId);
+/**
+ * @swagger
+ * /rooms/{hotelId}/with-prices:
+ *   get:
+ *     summary: Get rooms and their prices by hotel ID
+ *     description: Retrieves all rooms and their prices for a specific hotel by its ID.
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: hotelId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the hotel to retrieve rooms and prices for.
+ *     responses:
+ *       200:
+ *         description: List of rooms with prices.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The unique identifier of the room.
+ *                   name:
+ *                     type: string
+ *                     description: The name of the room.
+ *                   roomTypeId:
+ *                     type: integer
+ *                     description: The ID of the room type.
+ *                   hotelId:
+ *                     type: integer
+ *                     description: The ID of the hotel.
+ *                   price:
+ *                     type: number
+ *                     description: The price of the room based on its type.
+ *       400:
+ *         description: Invalid hotel ID supplied.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid hotel ID.
+ *       404:
+ *         description: No rooms found for the specified hotel.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No rooms found for this hotel.
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error.
+ *                 error:
+ *                   type: string
+ *                   description: Detailed error message.
+ */
+router.get('/:hotelId/with-prices', RoomController_1.RoomController.getRoomAndPriceByHotelId);
 /**
  * @swagger
  * /rooms:

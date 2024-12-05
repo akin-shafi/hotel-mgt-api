@@ -14,22 +14,15 @@ exports.BillingService = void 0;
 const data_source_1 = require("../data-source");
 const BillingEntity_1 = require("../entities/BillingEntity");
 const ReservationEntity_1 = require("../entities/ReservationEntity");
+const constants_1 = require("../constants");
 const billingRepository = data_source_1.AppDataSource.getRepository(BillingEntity_1.Billing);
 const reservationRepository = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
 class BillingService {
-    createBill(reservationId, amount, paymentMethod) {
+    // BillingService
+    createBill(billDetails) {
         return __awaiter(this, void 0, void 0, function* () {
-            const reservation = yield reservationRepository.findOne({ where: { id: reservationId } });
-            if (!reservation)
-                throw new Error('Reservation not found');
-            const bill = billingRepository.create({
-                amount,
-                status: 'unpaid',
-                payment_method: paymentMethod, // Ensure the correct property name
-                reservation,
-            });
-            yield billingRepository.save(bill);
-            return bill;
+            const user = billingRepository.create(billDetails);
+            return billingRepository.save(user);
         });
     }
     payBill(billId) {
@@ -37,11 +30,12 @@ class BillingService {
             const bill = yield billingRepository.findOne({ where: { id: billId } });
             if (!bill)
                 throw new Error('Bill not found');
-            bill.status = 'paid';
+            // Assign the enum value for "paid"
+            bill.status = BillingEntity_1.BillingStatus.PAID;
             yield billingRepository.save(bill);
-            // Optionally, update reservation status to "paid"
+            // Optionally, update reservation status to "completed"
             const reservation = bill.reservation;
-            reservation.status = 'completed';
+            reservation.status = constants_1.ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
             yield reservationRepository.save(reservation);
             return bill;
         });
@@ -54,6 +48,14 @@ class BillingService {
     getBillById(billId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield billingRepository.findOne({ where: { id: billId }, relations: ['reservation'] });
+        });
+    }
+    getBillByReservationId(reservationId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield billingRepository.findOne({
+                where: { reservation: { id: reservationId } }, // Adjusted to query by `reservation.id`
+                relations: ["reservation"], // Ensure the relation is loaded
+            });
         });
     }
 }

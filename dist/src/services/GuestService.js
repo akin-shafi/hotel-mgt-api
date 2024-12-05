@@ -12,25 +12,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GuestService = void 0;
 const data_source_1 = require("../data-source");
 const GuestEntity_1 = require("../entities/GuestEntity");
+const guestRepository = data_source_1.AppDataSource.getRepository(GuestEntity_1.Guest);
 class GuestService {
-    constructor() {
-        this.guestRepository = data_source_1.AppDataSource.getRepository(GuestEntity_1.Guest);
-    }
-    createGuest(fullName, email, phone, address) {
+    // GuestService
+    static createGuest(guestDetails) {
         return __awaiter(this, void 0, void 0, function* () {
-            const guest = this.guestRepository.create({ fullName, email, phone, address });
-            yield this.guestRepository.save(guest);
+            const guest = guestRepository.create(guestDetails);
+            yield guestRepository.save(guest);
             return guest;
         });
     }
     getGuests() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.guestRepository.find();
+            return yield guestRepository.find();
         });
     }
-    getGuestById(id) {
+    getGuestById(id_1) {
+        return __awaiter(this, arguments, void 0, function* (id, relations = []) {
+            const guestRepo = data_source_1.AppDataSource.getRepository(GuestEntity_1.Guest);
+            return guestRepo.findOne({
+                where: { id },
+                relations, // Dynamically include the specified relations
+            });
+        });
+    }
+    static getGuestByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.guestRepository.findOne({ where: { id } });
+            return yield guestRepository.findOne({ where: { email } });
         });
     }
 }

@@ -7,10 +7,10 @@ const router = Router();
 
 /**
  * @swagger
- * /billing:
+ * /api/billing:
  *   post:
- *     summary: Create a new bill
- *     description: Generates a new bill with details such as amount, due date, and related guest.
+ *     summary: Create bills for reservation services
+ *     description: Generates bills for a reservation based on an array of services.
  *     tags: [Billing]
  *     requestBody:
  *       required: true
@@ -19,37 +19,48 @@ const router = Router();
  *           schema:
  *             type: object
  *             properties:
- *               guestId:
- *                 type: integer
- *                 description: ID of the guest being billed.
- *                 example: 1
- *               amount:
- *                 type: number
- *                 format: float
- *                 description: Amount due for the bill.
- *                 example: 150.75
- *               dueDate:
+ *               reservationId:
  *                 type: string
- *                 format: date
- *                 description: Due date for the bill.
- *                 example: "2024-12-31"
+ *                 description: ID of the reservation for which bills are being created.
+ *                 example: "1"
+ *               services:
+ *                 type: array
+ *                 description: List of services to generate bills for the reservation.
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     serviceName:
+ *                       type: string
+ *                       description: Name of the service.
+ *                       example: "Room Cleaning"
+ *                     price:
+ *                       type: number
+ *                       format: float
+ *                       description: Price of the service.
+ *                       example: 50.00
  *     responses:
  *       201:
- *         description: Bill created successfully.
+ *         description: Bills created successfully.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Bill'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Bill'
  *       400:
- *         description: Invalid input.
+ *         description: Invalid input. Missing or incorrect reservationId or services array.
+ *       404:
+ *         description: Reservation not found.
  *       500:
  *         description: Server error.
  */
+
+
 router.post('/', BillingController.createBill);
 
 /**
  * @swagger
- * /billing/{billId}/pay:
+ * /api/billing/{billId}/pay:
  *   put:
  *     summary: Pay a bill
  *     description: Updates a bill's status to paid, and records the payment details.
@@ -93,7 +104,7 @@ router.put('/:billId/pay', BillingController.payBill);
 
 /**
  * @swagger
- * /billing:
+ * /api/billing:
  *   get:
  *     summary: Get all bills
  *     description: Retrieves a list of all bills with details such as amount, due date, and status.
@@ -114,7 +125,7 @@ router.get('/', BillingController.getBills);
 
 /**
  * @swagger
- * /billing/{billId}:
+ * /api/billing/{billId}:
  *   get:
  *     summary: Get a bill by ID
  *     description: Retrieve details of a specific bill by its ID, including payment status.
@@ -139,5 +150,33 @@ router.get('/', BillingController.getBills);
  *         description: Server error.
  */
 router.get('/:billId', BillingController.getBillById);
+
+/**
+ * @swagger
+ * /api/billing/find-by/{reservationId}:
+ *   get:
+ *     summary: Get a bill by ID
+ *     description: Retrieve details of a specific bill by its ID, including payment status.
+ *     tags: [Billing]
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the bill to retrieve.
+ *     responses:
+ *       200:
+ *         description: Bill details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Bill'
+ *       404:
+ *         description: Bill not found.
+ *       500:
+ *         description: Server error.
+ */
+router.get('/find-by/:reservationId', BillingController.getBillByReservationId);
 
 export default router;

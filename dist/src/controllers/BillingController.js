@@ -10,17 +10,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const BillingService_1 = require("../services/BillingService");
+const ReservationService_1 = require("../services/ReservationService"); // Adjust the import path for reservation service
 const billingService = new BillingService_1.BillingService();
 class BillingController {
     createBill(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { reservationId, amount, paymentMethod } = req.body;
+            const { reservationId, services } = req.body;
+            if (!reservationId || !services || !Array.isArray(services) || services.length === 0) {
+                return res.status(400).json({
+                    message: "Invalid input. Please provide a reservationId and an array of services.",
+                });
+            }
             try {
-                const bill = yield billingService.createBill(reservationId, amount, paymentMethod);
-                res.status(201).json(bill);
+                // Check if the reservation exists
+                const reservation = yield ReservationService_1.ReservationService.getReservationById(reservationId);
+                if (!reservation) {
+                    return res.status(404).json({ message: "Reservation not found." });
+                }
+                // Generate bills for each service
+                const bills = yield Promise.all(services.map((service) => billingService.createBill(Object.assign({ reservationId }, service))));
+                // Return all created bills
+                res.status(201).json(bills);
             }
             catch (error) {
-                res.status(400).json({ message: error.message });
+                res.status(500).json({ message: error.message });
             }
         });
     }
@@ -52,6 +65,21 @@ class BillingController {
             const { billId } = req.params;
             try {
                 const bill = yield billingService.getBillById(parseInt(billId));
+                if (!bill) {
+                    return res.status(404).json({ message: 'Bill not found' });
+                }
+                res.status(200).json(bill);
+            }
+            catch (error) {
+                res.status(400).json({ message: error.message });
+            }
+        });
+    }
+    getBillByReservationId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { reservationId } = req.params;
+            try {
+                const bill = yield billingService.getBillByReservationId(parseInt(reservationId));
                 if (!bill) {
                     return res.status(404).json({ message: 'Bill not found' });
                 }

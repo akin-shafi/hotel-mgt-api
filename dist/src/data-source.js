@@ -11,8 +11,9 @@ dotenv_1.default.config();
 // Import all entities
 const UserEntity_1 = require("./entities/UserEntity");
 const GuestEntity_1 = require("./entities/GuestEntity");
-const HotelEnitity_1 = require("./entities/HotelEnitity"); // Add the Hotel entity here
+const HotelEntity_1 = require("./entities/HotelEntity"); // Add the Hotel entity here
 const RoomEntity_1 = require("./entities/RoomEntity");
+const RoomTypeEntity_1 = require("./entities/RoomTypeEntity");
 const ReservationEntity_1 = require("./entities/ReservationEntity");
 const HousekeepingTaskEntity_1 = require("./entities/HousekeepingTaskEntity");
 const BillingEntity_1 = require("./entities/BillingEntity");
@@ -24,10 +25,11 @@ exports.AppDataSource = new typeorm_1.DataSource({
     password: process.env.DB_PASSWORD || 'admin',
     database: process.env.DB_DATABASE || 'hotel_mgt_db',
     entities: [
+        HotelEntity_1.Hotel,
         UserEntity_1.User,
         GuestEntity_1.Guest,
-        HotelEnitity_1.Hotel,
         RoomEntity_1.Room,
+        RoomTypeEntity_1.RoomType,
         ReservationEntity_1.Reservation, // Make sure this is included
         HousekeepingTaskEntity_1.HousekeepingTask,
         BillingEntity_1.Billing

@@ -1,6 +1,6 @@
 // hotelService.ts
 import { AppDataSource } from '../data-source';
-import { Hotel } from '../entities/HotelEnitity';
+import { Hotel } from '../entities/HotelEntity';
 
 const hotelRepository = AppDataSource.getRepository(Hotel);
 

@@ -1,58 +1,29 @@
+"use strict";
 // src/routes/RoomRoutes.ts
-
-import { Router } from 'express';
-import  {RoomController}  from '../controllers/RoomController';
-
-const router = Router();
-
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const RoomTypeController_1 = require("../controllers/RoomTypeController");
+const router = (0, express_1.Router)();
 /**
  * @swagger
- * /rooms/maintenance-options:
+ * /rooms:
  *   get:
- *     summary: Get maintenance status options
- *     description: Fetch the available options for room maintenance status from the enum.
+ *     summary: Get all rooms
+ *     description: Retrieves a list of all rooms with details such as room type, status, and price.
  *     tags: [Rooms]
  *     responses:
  *       200:
- *         description: A list of maintenance status options.
+ *         description: List of rooms.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   label:
- *                     type: string
- *                   value:
- *                     type: string
+ *                 $ref: '#/components/schemas/Room'
  *       500:
  *         description: Server error.
  */
-router.get('/maintenance-options', RoomController.getMaintenanceStatus);
-
-// /**
-//  * @swagger
-//  * /rooms:
-//  *   get:
-//  *     summary: Get all rooms
-//  *     description: Retrieves a list of all rooms with details such as room type, status, and price.
-//  *     tags: [Rooms]
-//  *     responses:
-//  *       200:
-//  *         description: List of rooms.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 $ref: '#/components/schemas/Room'
-//  *       500:
-//  *         description: Server error.
-//  */
-// router.get('/', RoomController.getAllRooms);
-
+router.get('/', RoomTypeController_1.RoomController.getAllRooms);
 /**
  * @swagger
  * /rooms/{id}:
@@ -79,18 +50,17 @@ router.get('/maintenance-options', RoomController.getMaintenanceStatus);
  *       500:
  *         description: Server error.
  */
-router.get('/:id', RoomController.getRoomById);
-
+router.get('/:id', RoomTypeController_1.RoomController.getRoomById);
 /**
  * @swagger
- * /rooms/hotels/{hotelId}:
+ * /rooms/hotels/{tenantId}:
  *   get:
  *     summary: Get rooms by hotel ID
  *     description: Retrieves all rooms associated with a specific hotel by its ID.
  *     tags: [Rooms]
  *     parameters:
  *       - in: path
- *         name: hotelId
+ *         name: tenantId
  *         required: true
  *         schema:
  *           type: string
@@ -108,85 +78,7 @@ router.get('/:id', RoomController.getRoomById);
  *       500:
  *         description: Server error.
  */
-router.get('/hotels/:hotelId', RoomController.getRoomsByhotelId);
-
-/**
- * @swagger
- * /rooms/{hotelId}/with-prices:
- *   get:
- *     summary: Get rooms and their prices by hotel ID
- *     description: Retrieves all rooms and their prices for a specific hotel by its ID.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: hotelId
- *         required: true
- *         schema:
- *           type: integer
- *         description: The ID of the hotel to retrieve rooms and prices for.
- *     responses:
- *       200:
- *         description: List of rooms with prices.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     description: The unique identifier of the room.
- *                   name:
- *                     type: string
- *                     description: The name of the room.
- *                   roomTypeId:
- *                     type: integer
- *                     description: The ID of the room type.
- *                   hotelId:
- *                     type: integer
- *                     description: The ID of the hotel.
- *                   price:
- *                     type: number
- *                     description: The price of the room based on its type.
- *       400:
- *         description: Invalid hotel ID supplied.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid hotel ID.
- *       404:
- *         description: No rooms found for the specified hotel.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: No rooms found for this hotel.
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Server error.
- *                 error:
- *                   type: string
- *                   description: Detailed error message.
- */
-router.get('/:hotelId/with-prices', RoomController.getRoomAndPriceByHotelId);
-
-
-
+router.get('/hotels/:tenantId', RoomTypeController_1.RoomController.getRoomsByTenantId);
 /**
  * @swagger
  * /rooms:
@@ -247,10 +139,7 @@ router.get('/:hotelId/with-prices', RoomController.getRoomAndPriceByHotelId);
  *       500:
  *         description: Server error.
  */
-router.post('/', RoomController.createRoom);
-
-
-
+router.post('/', RoomTypeController_1.RoomController.createRoom);
 /**
  * @swagger
  * /rooms/{id}:
@@ -298,8 +187,7 @@ router.post('/', RoomController.createRoom);
  *       500:
  *         description: Server error.
  */
-router.put('/:id', RoomController.updateRoom);
-
+router.put('/:id', RoomTypeController_1.RoomController.updateRoom);
 /**
  * @swagger
  * /rooms/{id}:
@@ -322,8 +210,5 @@ router.put('/:id', RoomController.updateRoom);
  *       500:
  *         description: Server error.
  */
-router.delete('/:id', RoomController.deleteRoom);
-
-
-
-export default router;
+router.delete('/:id', RoomTypeController_1.RoomController.deleteRoom);
+exports.default = router;
