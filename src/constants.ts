@@ -36,7 +36,7 @@ export enum AccountStatus {
   }
 
   // Enum for reservation status
-export enum Activity {
+export enum ActivityType {
   ARRIVAL = 'Arrival',
   CHECK_IN = 'Check-in',
   CHECK_OUT = 'Check-out',

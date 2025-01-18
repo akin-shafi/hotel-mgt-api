@@ -18,7 +18,7 @@ export class User {
   tenantId: string; // Identify which tenant this user belongs to
 
   @Column({ nullable: true })
-  hotelId: number;
+  hotelId: number; 
 
   @Column({ unique: true })
   email: string;

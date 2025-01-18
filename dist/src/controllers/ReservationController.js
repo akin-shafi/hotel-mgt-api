@@ -177,10 +177,10 @@ class ReservationController {
     static getActivityOptions(req, res) {
         try {
             // Convert enum to an array of objects with label and value
-            const ActivityOptions = Object.keys(constants_1.Activity).map(key => {
+            const ActivityOptions = Object.keys(constants_1.ActivityType).map(key => {
                 return {
                     label: key.replace(/_/g, ' ').toUpperCase(), // Format the label (e.g., UNDER_MAINTENANCE -> Under Maintenance)
-                    value: constants_1.Activity[key] // Get the enum value
+                    value: constants_1.ActivityType[key] // Get the enum value
                 };
             });
             // Send a response with the maintenance statuses

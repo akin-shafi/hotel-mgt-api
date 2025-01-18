@@ -12,7 +12,7 @@ import { Billing } from './BillingEntity'; // Import Billing entity
 import { Hotel } from './HotelEntity'; // Import Hotel entity
 import { Guest } from './GuestEntity'; // Import Guest entity
 import { Room } from './RoomEntity'; // Import Room entity
-import { ReservationType, Activity, ReservationStatus } from "../constants"
+import { ReservationType, ActivityType, ReservationStatus } from "../constants"
 
 
 
@@ -49,9 +49,9 @@ export class Reservation {
   @Column({ type: 'enum', enum: ReservationStatus })
   status: ReservationStatus;
 
-  @Column({ type: 'enum', enum: Activity })
+  @Column({ type: 'enum', enum: ActivityType })
   // @Column({ nullable: true })
-  activity: Activity;
+  activity: ActivityType;
 
   @Column({ type: 'boolean', default: false })
   paymentStatus: boolean;
@@ -90,3 +90,5 @@ export class Reservation {
   @Column({ type: 'date', nullable: true })
   confirmedDate: Date;
 }
+export { ReservationStatus };
+

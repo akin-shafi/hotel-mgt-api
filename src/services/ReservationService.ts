@@ -1,7 +1,7 @@
 import { AppDataSource } from "../data-source"; // Your database connection
 import { Reservation } from "../entities/ReservationEntity";
 import { Repository, In } from "typeorm";
-import {Activity, ReservationType } from "../constants"
+import {ActivityType, ReservationType } from "../constants"
 
 let reservationRepository: Repository<Reservation>;
 
@@ -40,11 +40,11 @@ export class ReservationService {
   
       // Query reservations for totals based on activity and filters
       const activityMetrics = await Promise.all(
-        Object.entries(Activity).map(async ([key, label]) => {
-          const activityKey = key as keyof typeof Activity; // Cast key to keyof Activity
+        Object.entries(ActivityType).map(async ([key, label]) => {
+          const activityKey = key as keyof typeof ActivityType; // Cast key to keyof Activity
           const totalCount = await reservationRepo.count({
             where: {
-              activity: Activity[activityKey], // Use the Activity enum value
+              activity: ActivityType[activityKey], // Use the Activity enum value
               ...whereCondition, // Add the dynamically built where condition
             },
           });
@@ -154,7 +154,7 @@ export class ReservationService {
     const checkInDate = new Date(reservation.checkInDate);
     const checkOutDate = new Date(reservation.checkOutDate);
 
-    if (reservation.activity === Activity.CANCELLATION) {
+    if (reservation.activity === ActivityType.CANCELLATION) {
       return { activity: "Cancellation", cta: ["Confirm Cancellation", "Reject Cancellation"] };
     }
 

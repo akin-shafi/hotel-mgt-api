@@ -9,12 +9,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Reservation = void 0;
+exports.ReservationStatus = exports.Reservation = void 0;
 const typeorm_1 = require("typeorm");
 const BillingEntity_1 = require("./BillingEntity"); // Import Billing entity
 const HotelEntity_1 = require("./HotelEntity"); // Import Hotel entity
 const GuestEntity_1 = require("./GuestEntity"); // Import Guest entity
 const constants_1 = require("../constants");
+Object.defineProperty(exports, "ReservationStatus", { enumerable: true, get: function () { return constants_1.ReservationStatus; } });
 let Reservation = class Reservation {
 };
 exports.Reservation = Reservation;
@@ -60,7 +61,7 @@ __decorate([
     __metadata("design:type", String)
 ], Reservation.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: constants_1.Activity })
+    (0, typeorm_1.Column)({ type: 'enum', enum: constants_1.ActivityType })
     // @Column({ nullable: true })
     ,
     __metadata("design:type", String)

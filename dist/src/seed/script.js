@@ -13,8 +13,8 @@ const data_source_1 = require("../data-source");
 const GuestEntity_1 = require("../entities/GuestEntity");
 const BillingEntity_1 = require("../entities/BillingEntity");
 const ReservationEntity_1 = require("../entities/ReservationEntity");
-const ReservationEntity_2 = require("../entities/ReservationEntity");
 const BillingEntity_2 = require("../entities/BillingEntity");
+const constants_1 = require("../constants");
 // Sample guest data
 const guests = [
     {
@@ -53,8 +53,8 @@ const reservations = [
         guest: guests[0],
         checkInDate: new Date('2024-12-01'),
         checkOutDate: new Date('2024-12-05'),
-        reservationType: ReservationEntity_2.ReservationType.WALK_IN, // Corrected to use enum value
-        status: ReservationEntity_2.ReservationStatus.PENDING, // Corrected to use enum value
+        reservationType: constants_1.ReservationType.WALK_IN, // Corrected to use enum value
+        status: ReservationEntity_1.ReservationStatus.PENDING, // Corrected to use enum value
         activity: 'Arrival',
         paymentStatus: false,
         confirmed: false,
@@ -66,8 +66,8 @@ const reservations = [
         guest: guests[1],
         checkInDate: new Date('2024-12-10'),
         checkOutDate: new Date('2024-12-15'),
-        reservationType: ReservationEntity_2.ReservationType.BOOKED_ONLINE, // Corrected to use enum value
-        status: ReservationEntity_2.ReservationStatus.COMPLETED, // Corrected to use enum value
+        reservationType: constants_1.ReservationType.ONLINE_BOOKING, // Corrected to use enum value
+        status: ReservationEntity_1.ReservationStatus.CONFIRMED, // Corrected to use enum value
         activity: 'In-House',
         paymentStatus: true,
         confirmed: true,
@@ -86,7 +86,13 @@ function seedData() {
         // Insert billings
         const savedBillings = yield billingRepository.save(billings);
         // Insert reservations and associate them with guests and billings
-        const savedReservations = yield reservationRepository.save(reservations.map((reservation, index) => (Object.assign(Object.assign({}, reservation), { guest: savedGuests[index], billing: [savedBillings[index]] }))));
+        // const savedReservations = await reservationRepository.save(
+        //   reservations.map((reservation, index) => ({
+        //     ...reservation,
+        //     guest: savedGuests[index],
+        //     billing: [savedBillings[index]], // Associating billing data
+        //   }))
+        // );
         console.log('Sample data seeded successfully!');
     });
 }

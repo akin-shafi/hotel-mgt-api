@@ -59,7 +59,7 @@ __decorate([
     __metadata("design:type", String)
 ], Hotel.prototype, "tenantId", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => UserEntity_1.User, (user) => user.hotel),
+    (0, typeorm_1.OneToMany)(() => UserEntity_1.User, (user) => user.hotelId),
     __metadata("design:type", Array)
 ], Hotel.prototype, "users", void 0);
 __decorate([
@@ -83,7 +83,7 @@ __decorate([
     __metadata("design:type", Array)
 ], Hotel.prototype, "guests", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => RoomEntity_1.Room, (room) => room.hotel),
+    (0, typeorm_1.OneToMany)(() => RoomEntity_1.Room, (room) => room.hotelId),
     __metadata("design:type", Array)
 ], Hotel.prototype, "rooms", void 0);
 __decorate([

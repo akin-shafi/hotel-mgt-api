@@ -246,7 +246,7 @@ export class UserService {
       return await userRepository.findOne({
         where: {
           email: normalizedEmail,
-          hotel: { tenantId },
+          tenantId: tenantId,
         },
         relations: ['hotel'],
       });

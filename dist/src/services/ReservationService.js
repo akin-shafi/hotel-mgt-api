@@ -41,10 +41,10 @@ class ReservationService {
                     whereCondition.confirmedDate = confirmedDate;
                 }
                 // Query reservations for totals based on activity and filters
-                const activityMetrics = yield Promise.all(Object.entries(constants_1.Activity).map((_a) => __awaiter(this, [_a], void 0, function* ([key, label]) {
+                const activityMetrics = yield Promise.all(Object.entries(constants_1.ActivityType).map((_a) => __awaiter(this, [_a], void 0, function* ([key, label]) {
                     const activityKey = key; // Cast key to keyof Activity
                     const totalCount = yield reservationRepo.count({
-                        where: Object.assign({ activity: constants_1.Activity[activityKey] }, whereCondition),
+                        where: Object.assign({ activity: constants_1.ActivityType[activityKey] }, whereCondition),
                     });
                     return {
                         label,
@@ -147,7 +147,7 @@ class ReservationService {
             const today = new Date(currentDate);
             const checkInDate = new Date(reservation.checkInDate);
             const checkOutDate = new Date(reservation.checkOutDate);
-            if (reservation.activity === constants_1.Activity.CANCELLATION) {
+            if (reservation.activity === constants_1.ActivityType.CANCELLATION) {
                 return { activity: "Cancellation", cta: ["Confirm Cancellation", "Reject Cancellation"] };
             }
             if (reservation.reservationType === constants_1.ReservationType.ONLINE_BOOKING && !reservation.confirmed) {

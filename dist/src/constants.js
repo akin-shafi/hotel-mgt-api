@@ -1,7 +1,7 @@
 "use strict";
 // src/constants.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReservationStatus = exports.ReservationType = exports.Activity = exports.MaintenanceStatus = exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
+exports.ReservationStatus = exports.ReservationType = exports.ActivityType = exports.MaintenanceStatus = exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["Admin"] = "admin";
@@ -36,15 +36,15 @@ var MaintenanceStatus;
     MaintenanceStatus["IN_USE"] = "in_use";
 })(MaintenanceStatus || (exports.MaintenanceStatus = MaintenanceStatus = {}));
 // Enum for reservation status
-var Activity;
-(function (Activity) {
-    Activity["ARRIVAL"] = "Arrival";
-    Activity["CHECK_IN"] = "Check-in";
-    Activity["CHECK_OUT"] = "Check-out";
-    Activity["DUE_OUT"] = "Due-out";
-    Activity["BOOKINGS"] = "Booking";
-    Activity["CANCELLATION"] = "Cancelled";
-})(Activity || (exports.Activity = Activity = {}));
+var ActivityType;
+(function (ActivityType) {
+    ActivityType["ARRIVAL"] = "Arrival";
+    ActivityType["CHECK_IN"] = "Check-in";
+    ActivityType["CHECK_OUT"] = "Check-out";
+    ActivityType["DUE_OUT"] = "Due-out";
+    ActivityType["BOOKINGS"] = "Booking";
+    ActivityType["CANCELLATION"] = "Cancelled";
+})(ActivityType || (exports.ActivityType = ActivityType = {}));
 // Enum for reservation type
 var ReservationType;
 (function (ReservationType) {

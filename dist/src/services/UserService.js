@@ -248,7 +248,7 @@ class UserService {
                 return yield exports.userRepository.findOne({
                     where: {
                         email: normalizedEmail,
-                        hotel: { tenantId },
+                        tenantId: tenantId,
                     },
                     relations: ['hotel'],
                 });

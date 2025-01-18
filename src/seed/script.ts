@@ -1,9 +1,9 @@
 import { AppDataSource } from '../data-source';
 import { Guest } from '../entities/GuestEntity';
 import { Billing } from '../entities/BillingEntity';
-import { Reservation } from '../entities/ReservationEntity';
-import { ReservationType, ReservationStatus } from '../entities/ReservationEntity';
+import { Reservation, ReservationStatus } from '../entities/ReservationEntity';
 import { BillingStatus, PaymentMethod } from '../entities/BillingEntity';
+import { ReservationType } from '../constants';
 
 // Sample guest data
 const guests = [
@@ -58,8 +58,8 @@ const reservations = [
     guest: guests[1],
     checkInDate: new Date('2024-12-10'),
     checkOutDate: new Date('2024-12-15'),
-    reservationType: ReservationType.BOOKED_ONLINE, // Corrected to use enum value
-    status: ReservationStatus.COMPLETED, // Corrected to use enum value
+    reservationType: ReservationType.ONLINE_BOOKING, // Corrected to use enum value
+    status: ReservationStatus.CONFIRMED, // Corrected to use enum value
     activity: 'In-House',
     paymentStatus: true,
     confirmed: true,
@@ -81,13 +81,13 @@ async function seedData() {
   const savedBillings = await billingRepository.save(billings);
 
   // Insert reservations and associate them with guests and billings
-  const savedReservations = await reservationRepository.save(
-    reservations.map((reservation, index) => ({
-      ...reservation,
-      guest: savedGuests[index],
-      billing: [savedBillings[index]], // Associating billing data
-    }))
-  );
+  // const savedReservations = await reservationRepository.save(
+  //   reservations.map((reservation, index) => ({
+  //     ...reservation,
+  //     guest: savedGuests[index],
+  //     billing: [savedBillings[index]], // Associating billing data
+  //   }))
+  // );
 
   console.log('Sample data seeded successfully!');
 }

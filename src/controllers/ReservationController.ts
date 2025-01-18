@@ -5,7 +5,7 @@ import { Billing } from "../entities/BillingEntity";
 import { GuestService } from "../services/GuestService";
 import { Reservation, } from "../entities/ReservationEntity";
 import { AppDataSource } from '../data-source';
-import { Activity, ReservationStatus, ReservationType  } from "../constants"
+import { ActivityType, ReservationStatus, ReservationType  } from "../constants"
 
 
 const reservationService = new ReservationService();
@@ -193,10 +193,10 @@ export class ReservationController {
   static getActivityOptions(req: Request, res: Response): void {
     try {
       // Convert enum to an array of objects with label and value
-      const ActivityOptions = Object.keys(Activity).map(key => {
+      const ActivityOptions = Object.keys(ActivityType).map(key => {
         return {
           label: key.replace(/_/g, ' ').toUpperCase(), // Format the label (e.g., UNDER_MAINTENANCE -> Under Maintenance)
-          value: Activity[key as keyof typeof Activity]  // Get the enum value
+          value: ActivityType[key as keyof typeof ActivityType]  // Get the enum value
         };
       });
 

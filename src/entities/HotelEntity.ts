@@ -45,7 +45,7 @@ export class Hotel {
   @Column({ unique: true })
   tenantId: string; // Renamed tenantId to tenant_id in database
 
-  @OneToMany(() => User, (user) => user.hotel)
+  @OneToMany(() => User, (user) => user.hotelId)
   users: User[];
 
   @Column({ nullable: true })
@@ -63,7 +63,7 @@ export class Hotel {
   @OneToMany(() => Guest, (guest) => guest.hotel)
   guests: Guest[];
 
-  @OneToMany(() => Room, (room) => room.hotel)
+  @OneToMany(() => Room, (room) => room.hotelId)
   rooms: Room[];
 
   @CreateDateColumn()
