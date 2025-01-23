@@ -18,7 +18,7 @@ export class Hotel {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true }) 
   name: string;
 
   @Column({ nullable: true })

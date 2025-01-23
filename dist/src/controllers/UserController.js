@@ -48,6 +48,7 @@ const uuid_1 = require("uuid"); // For generating verification tokens
 const config_1 = require("../config");
 const XLSX = __importStar(require("xlsx"));
 const constants_1 = require("../constants");
+const HotelService_1 = require("../services/HotelService");
 // import { format } from 'date-fns';
 const userService = new UserService_1.UserService();
 const userRepository = data_source_1.AppDataSource.getRepository(UserEntity_1.User);
@@ -469,6 +470,7 @@ class UserController {
                 }
                 // Generate JWT token
                 const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '1h' });
+                const hotelData = yield HotelService_1.HotelService.getHotelById(user.hotelId);
                 // Respond with token and user info
                 res.status(200).json({
                     statusCode: 200,
@@ -483,6 +485,7 @@ class UserController {
                         onboardingStep: user.onboardingStep,
                         tenantId: user.tenantId,
                         hotelId: user.hotelId,
+                        hotelName: hotelData.name,
                         profilePicture: user === null || user === void 0 ? void 0 : user.profilePicture,
                     },
                 });

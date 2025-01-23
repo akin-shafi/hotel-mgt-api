@@ -30,10 +30,10 @@ class HotelController {
             try {
                 const _a = req.body, { email, name, tenantId } = _a, otherFields = __rest(_a, ["email", "name", "tenantId"]);
                 // Check if a hotel with the given email exists
-                const existingHotel = yield hotelService.getHotelByEmail(email);
+                const existingHotel = yield HotelService_1.HotelService.getHotelByEmail(email);
                 if (existingHotel) {
                     // Update the existing hotel
-                    const updatedHotel = yield hotelService.update(tenantId, Object.assign({ name,
+                    const updatedHotel = yield HotelService_1.HotelService.update(tenantId, Object.assign({ name,
                         tenantId }, otherFields));
                     return res.status(200).json({
                         statusCode: 200,
@@ -42,7 +42,7 @@ class HotelController {
                     });
                 }
                 // Create a new hotel
-                const newHotel = yield hotelService.create(Object.assign({ email,
+                const newHotel = yield HotelService_1.HotelService.create(Object.assign({ email,
                     name,
                     tenantId }, otherFields));
                 return res.status(201).json({
@@ -64,7 +64,7 @@ class HotelController {
     getAllHotels(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const hotels = yield hotelService.getAllHotels();
+                const hotels = yield HotelService_1.HotelService.getAllHotels();
                 return res.status(200).json(hotels);
             }
             catch (error) {
@@ -78,7 +78,7 @@ class HotelController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = parseInt(req.params.id);
-                const hotel = yield hotelService.getHotelById(id);
+                const hotel = yield HotelService_1.HotelService.getHotelById(id);
                 return hotel ? res.status(200).json(hotel) : res.status(404).json({ message: 'Hotel not found' });
             }
             catch (error) {
@@ -92,7 +92,7 @@ class HotelController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { tenantId } = req.params;
-                const hotel = yield hotelService.getHotelByTenantId(tenantId);
+                const hotel = yield HotelService_1.HotelService.getHotelByTenantId(tenantId);
                 return hotel ? res.status(200).json(hotel) : res.status(200).json([]);
             }
             catch (error) {
@@ -107,7 +107,7 @@ class HotelController {
             try {
                 const id = parseInt(req.params.id);
                 const updateData = req.body;
-                const updatedHotel = yield hotelService.updateHotel(id, updateData);
+                const updatedHotel = yield HotelService_1.HotelService.updateHotel(id, updateData);
                 return updatedHotel ? res.status(200).json(updatedHotel) : res.status(404).json({ message: 'Hotel not found' });
             }
             catch (error) {
@@ -121,7 +121,7 @@ class HotelController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = parseInt(req.params.id);
-                const isDeleted = yield hotelService.deleteHotel(id);
+                const isDeleted = yield HotelService_1.HotelService.deleteHotel(id);
                 return isDeleted ? res.status(200).json({ message: 'Hotel deleted successfully' }) : res.status(404).json({ message: 'Hotel not found' });
             }
             catch (error) {

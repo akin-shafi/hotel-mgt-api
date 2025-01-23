@@ -16,49 +16,49 @@ const HotelEntity_1 = require("../entities/HotelEntity");
 const hotelRepository = data_source_1.AppDataSource.getRepository(HotelEntity_1.Hotel);
 class HotelService {
     // Create a new hotel
-    create(hotelData) {
+    static create(hotelData) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = hotelRepository.create(hotelData);
             return hotelRepository.save(user);
         });
     }
-    update(tenantId, data) {
+    static update(tenantId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             yield hotelRepository.update({ tenantId }, data);
             return yield hotelRepository.findOneBy({ tenantId });
         });
     }
-    generateTenantId(name) {
+    static generateTenantId(name) {
         return __awaiter(this, void 0, void 0, function* () {
             const uniqueSuffix = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // Ensure two digits
             return `${name.replace(/\s+/g, '_').toLowerCase()}_${uniqueSuffix}`; // Generates tenantId based on name and suffix
         });
     }
     // Get all hotels
-    getAllHotels() {
+    static getAllHotels() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield hotelRepository.find();
         });
     }
     // Get a hotel by ID
-    getHotelById(id) {
+    static getHotelById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield hotelRepository.findOne({ where: { id } });
         });
     }
-    getHotelByEmail(email) {
+    static getHotelByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield hotelRepository.findOne({ where: { email } });
         });
     }
     // Get a hotel by tenantId
-    getHotelByTenantId(tenantId) {
+    static getHotelByTenantId(tenantId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield hotelRepository.findOne({ where: { tenantId } });
         });
     }
     // Update a hotel
-    updateHotel(id, updateData) {
+    static updateHotel(id, updateData) {
         return __awaiter(this, void 0, void 0, function* () {
             const hotel = yield hotelRepository.findOne({ where: { id } });
             if (!hotel)
@@ -68,7 +68,7 @@ class HotelService {
         });
     }
     // Delete a hotel
-    deleteHotel(id) {
+    static deleteHotel(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield hotelRepository.delete(id);
             return result.affected > 0;

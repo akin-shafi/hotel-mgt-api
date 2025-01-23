@@ -7,41 +7,41 @@ const hotelRepository = AppDataSource.getRepository(Hotel);
 export class HotelService {
 
   // Create a new hotel
-  public async create(hotelData: Partial<Hotel>): Promise<Hotel> {
+  static async create(hotelData: Partial<Hotel>): Promise<Hotel> {
     const user = hotelRepository.create(hotelData);
     return hotelRepository.save(user);
   }
 
-  public async update(tenantId: string, data: Partial<Hotel>): Promise<Hotel | null> {
+  static async update(tenantId: string, data: Partial<Hotel>): Promise<Hotel | null> {
     await hotelRepository.update({ tenantId }, data);
     return await hotelRepository.findOneBy({ tenantId });
   }
 
-  public async generateTenantId(name: string): Promise<string> {
+  static async generateTenantId(name: string): Promise<string> {
     const uniqueSuffix = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // Ensure two digits
     return `${name.replace(/\s+/g, '_').toLowerCase()}_${uniqueSuffix}`;  // Generates tenantId based on name and suffix
   }
   // Get all hotels
-  public async getAllHotels(): Promise<Hotel[]> {
+  static async getAllHotels(): Promise<Hotel[]> {
     return await hotelRepository.find();
   }
 
   // Get a hotel by ID
-  public async getHotelById(id: number): Promise<Hotel | null> {
+  static async getHotelById(id: number): Promise<Hotel | null> {
     return await hotelRepository.findOne({where: {id}});
   }
 
-  public async getHotelByEmail(email: string): Promise<Hotel | null> {
+  static async getHotelByEmail(email: string): Promise<Hotel | null> {
     return await hotelRepository.findOne({where: {email}});
   }
 
   // Get a hotel by tenantId
-  public async getHotelByTenantId(tenantId: string): Promise<Hotel | null> {
+  static async getHotelByTenantId(tenantId: string): Promise<Hotel | null> {
     return await hotelRepository.findOne({ where: { tenantId } });
   }
 
   // Update a hotel
-  public async updateHotel(id: number, updateData: Partial<Hotel>): Promise<Hotel | null> {
+  static async updateHotel(id: number, updateData: Partial<Hotel>): Promise<Hotel | null> {
     const hotel = await hotelRepository.findOne({where: {id}});
     if (!hotel) return null;
     
@@ -50,7 +50,7 @@ export class HotelService {
   }
 
   // Delete a hotel
-  public async deleteHotel(id: number): Promise<boolean> {
+  static async deleteHotel(id: number): Promise<boolean> {
     const result = await hotelRepository.delete(id);
     return result.affected > 0;
   }

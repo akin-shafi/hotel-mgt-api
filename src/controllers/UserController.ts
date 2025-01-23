@@ -520,6 +520,7 @@ class UserController {
         // Generate JWT token
         const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '1h' });
 
+        const hotelData = await HotelService.getHotelById(user.hotelId);
         // Respond with token and user info
         res.status(200).json({
             statusCode: 200,
@@ -534,6 +535,7 @@ class UserController {
                 onboardingStep: user.onboardingStep,
                 tenantId: user.tenantId,
                 hotelId: user.hotelId,
+                hotelName: hotelData.name,
                 profilePicture: user?.profilePicture,
             },
         });

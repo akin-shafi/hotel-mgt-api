@@ -12,11 +12,11 @@ class HotelController {
       const { email, name, tenantId, ...otherFields } = req.body;
   
       // Check if a hotel with the given email exists
-      const existingHotel = await hotelService.getHotelByEmail(email);
+      const existingHotel = await HotelService.getHotelByEmail(email);
   
       if (existingHotel) {
         // Update the existing hotel
-        const updatedHotel = await hotelService.update(tenantId, {
+        const updatedHotel = await HotelService.update(tenantId, {
           name,
           tenantId,
           ...otherFields,
@@ -30,7 +30,7 @@ class HotelController {
       }
   
       // Create a new hotel
-      const newHotel = await hotelService.create({
+      const newHotel = await HotelService.create({
         email,
         name,
         tenantId,
@@ -55,7 +55,7 @@ class HotelController {
   // Get all hotels
   public async getAllHotels(req: Request, res: Response): Promise<Response> {
     try {
-      const hotels = await hotelService.getAllHotels();
+      const hotels = await HotelService.getAllHotels();
       return res.status(200).json(hotels);
     } catch (error) {
       console.error('Error retrieving hotels:', error);
@@ -67,7 +67,7 @@ class HotelController {
   public async getHotelById(req: Request, res: Response): Promise<Response> {
     try {
       const id = parseInt(req.params.id);
-      const hotel = await hotelService.getHotelById(id);
+      const hotel = await HotelService.getHotelById(id);
       return hotel ? res.status(200).json(hotel) : res.status(404).json({ message: 'Hotel not found' });
     } catch (error) {
       console.error('Error retrieving hotel by ID:', error);
@@ -79,7 +79,7 @@ class HotelController {
   public async getHotelByTenantId(req: Request, res: Response): Promise<Response> {
     try {
       const { tenantId } = req.params;
-      const hotel = await hotelService.getHotelByTenantId(tenantId);
+      const hotel = await HotelService.getHotelByTenantId(tenantId);
       return hotel ? res.status(200).json(hotel) : res.status(200).json([]);
     } catch (error) {
       console.error('Error retrieving hotel by tenantId:', error);
@@ -93,7 +93,7 @@ class HotelController {
     try {
       const id = parseInt(req.params.id);
       const updateData = req.body;
-      const updatedHotel = await hotelService.updateHotel(id, updateData);
+      const updatedHotel = await HotelService.updateHotel(id, updateData);
       return updatedHotel ? res.status(200).json(updatedHotel) : res.status(404).json({ message: 'Hotel not found' });
     } catch (error) {
       console.error('Error updating hotel:', error);
@@ -105,7 +105,7 @@ class HotelController {
   public async deleteHotel(req: Request, res: Response): Promise<Response> {
     try {
       const id = parseInt(req.params.id);
-      const isDeleted = await hotelService.deleteHotel(id);
+      const isDeleted = await HotelService.deleteHotel(id);
       return isDeleted ? res.status(200).json({ message: 'Hotel deleted successfully' }) : res.status(404).json({ message: 'Hotel not found' });
     } catch (error) {
       console.error('Error deleting hotel:', error);
