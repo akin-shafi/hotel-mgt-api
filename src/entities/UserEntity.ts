@@ -1,7 +1,8 @@
 import { UserRole } from '../constants';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { AccountStatus } from '../constants';
 import { Hotel } from './HotelEntity';
+import { Promotion } from './PromotionEntity';
 
 @Entity()
 export class User {
@@ -86,4 +87,7 @@ export class User {
 
   @Column({ nullable: true, default: false })
   attemptedLoginFail: boolean;
+
+  // @OneToMany(() => Promotion, (promotion) => promotion.user) // Define the one-to-many relationship
+  // promotions: Promotion[];
 }

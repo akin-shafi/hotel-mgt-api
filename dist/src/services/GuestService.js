@@ -41,5 +41,24 @@ class GuestService {
             return yield guestRepository.findOne({ where: { email } });
         });
     }
+    static updateGuest(id, guestDetails) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield guestRepository.update(id, guestDetails);
+            const updatedGuest = yield guestRepository.findOne({ where: { id } });
+            if (!updatedGuest) {
+                throw new Error('Guest not found');
+            }
+            return updatedGuest;
+        });
+    }
+    static deleteGuest(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield guestRepository.delete(id);
+            if (result.affected === 0) {
+                throw new Error('Guest not found');
+            }
+            return { message: 'Guest deleted successfully' };
+        });
+    }
 }
 exports.GuestService = GuestService;

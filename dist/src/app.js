@@ -18,6 +18,7 @@ const ReservationRoutes_1 = __importDefault(require("./routes/ReservationRoutes"
 const GuestRoutes_1 = __importDefault(require("./routes/GuestRoutes"));
 const HousekeepingTaskRoutes_1 = __importDefault(require("./routes/HousekeepingTaskRoutes"));
 const BillingRoutes_1 = __importDefault(require("./routes/BillingRoutes"));
+const promotionsRoutes_1 = __importDefault(require("./routes/promotionsRoutes"));
 const express_winston_1 = __importDefault(require("express-winston"));
 const logger_1 = __importDefault(require("./utils/logger"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
@@ -82,6 +83,7 @@ data_source_1.AppDataSource.initialize()
     app.use('/guests', GuestRoutes_1.default);
     app.use('/housekeeping-tasks', HousekeepingTaskRoutes_1.default);
     app.use('/api/billing', BillingRoutes_1.default);
+    app.use('/promotions', promotionsRoutes_1.default);
     // Swagger setup
     app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec));
     // Error logging with Winston

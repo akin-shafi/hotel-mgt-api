@@ -13,6 +13,7 @@ import reservationRoutes from './routes/ReservationRoutes';
 import guestRoutes from './routes/GuestRoutes';
 import housekeepingTaskRoutes from './routes/HousekeepingTaskRoutes';
 import billingRoutes from './routes/BillingRoutes';
+import promotionsRoutes from './routes/promotionsRoutes';
 
 import expressWinston from 'express-winston';
 import logger from './utils/logger';
@@ -88,6 +89,7 @@ AppDataSource.initialize()
     app.use('/guests', guestRoutes);
     app.use('/housekeeping-tasks', housekeepingTaskRoutes);
     app.use('/api/billing', billingRoutes);
+    app.use('/promotions', promotionsRoutes);
     // Swagger setup
     app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 

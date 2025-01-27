@@ -71,4 +71,7 @@ export class Hotel {
 
   @UpdateDateColumn()
   updatedAt: Date; // Database column will use `updated_at`
+  
+  // @Column({ nullable: true })
+  // promotions: any;
 }
