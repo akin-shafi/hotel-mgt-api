@@ -8,13 +8,11 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Billing } from './BillingEntity'; // Import Billing entity
-import { Hotel } from './HotelEntity'; // Import Hotel entity
-import { Guest } from './GuestEntity'; // Import Guest entity
-import { Room } from './RoomEntity'; // Import Room entity
-import { ReservationType, ActivityType, ReservationStatus } from "../constants"
-
-
+import { Billing } from './BillingEntity';
+import { Hotel } from './HotelEntity';
+import { Guest } from './GuestEntity';
+import { BookedRoom } from './BookedRoomEntity';
+import { ReservationType, ActivityType, ReservationStatus } from '../constants';
 
 @Entity('reservations')
 export class Reservation {
@@ -25,55 +23,45 @@ export class Reservation {
   @JoinColumn({ name: 'guestId' })
   guest: Guest;
 
-  @Column({ nullable: true })
-  adults: number;
-
-  @Column({ nullable: true })
-  children: number;
-
-  @Column({ nullable: true })
-  roomName: string;
-
-  @Column({ nullable: true })
-  beds: string;
-
   @Column({ type: 'date' })
   checkInDate: Date;
 
   @Column({ type: 'date' })
   checkOutDate: Date;
 
-  @Column({ type: 'enum', enum: ReservationType })
-  reservationType: ReservationType;
-
-  @Column({ type: 'enum', enum: ReservationStatus })
-  status: ReservationStatus;
-
-  @Column({ type: 'enum', enum: ActivityType })
-  // @Column({ nullable: true })
-  activity: ActivityType;
-
-  @Column({ type: 'boolean', default: false })
-  paymentStatus: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  confirmed: boolean;
-
-  @Column({ nullable: true })
-  createdBy: string;
-
-  @Column({ nullable: true })
-  role: string;
-
-  @OneToMany(() => Billing, (billing) => billing.reservation)
-  billing: Billing[];
+  @OneToMany(() => BookedRoom, (bookedRoom) => bookedRoom.reservation, { eager: true })
+  bookedRooms: BookedRoom[];
 
   @ManyToOne(() => Hotel, (hotel) => hotel.reservations, { nullable: false })
   @JoinColumn({ name: 'hotelId' })
   hotel: Hotel;
 
-  @Column({ nullable: true })
+  @Column()
   hotelId: number;
+
+  @Column({ type: 'enum', enum: ActivityType, nullable: true })
+  activity: ActivityType;
+
+  @Column({ nullable: true })
+  reservationType: string;
+
+  @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.PENDING })
+  reservationStatus: ReservationStatus;
+
+  @Column({ type: 'boolean', default: false })
+  paymentStatus: boolean;
+
+  @OneToMany(() => Billing, (billing) => billing.reservation)
+  billing: Billing[];
+
+  @Column({ nullable: true })
+  createdBy: number;
+  
+  @Column({ nullable: true })
+  numberOfNights: number;
+
+  @Column({ nullable: true })
+  role: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -90,5 +78,3 @@ export class Reservation {
   @Column({ type: 'date', nullable: true })
   confirmedDate: Date;
 }
-export { ReservationStatus };
-

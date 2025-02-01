@@ -1,8 +1,8 @@
 // src/services/BillingService.ts
 import { AppDataSource } from '../data-source';
-import { Billing, BillingStatus } from '../entities/BillingEntity';
+import { Billing,  } from '../entities/BillingEntity';
 import { Reservation } from '../entities/ReservationEntity';
-import {ReservationStatus} from "../constants";
+import {ReservationStatus, BillingStatus} from "../constants";
 
 const billingRepository = AppDataSource.getRepository(Billing);
 const reservationRepository = AppDataSource.getRepository(Reservation);
@@ -21,12 +21,12 @@ export class BillingService {
     if (!bill) throw new Error('Bill not found');
   
     // Assign the enum value for "paid"
-    bill.status = BillingStatus.PAID;
+    bill.status = BillingStatus.COMPLETE_PAYMENT;
     await billingRepository.save(bill);
   
     // Optionally, update reservation status to "completed"
     const reservation = bill.reservation;
-    reservation.status = ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
+    reservation.reservationStatus = ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
     await reservationRepository.save(reservation);
   
     return bill;

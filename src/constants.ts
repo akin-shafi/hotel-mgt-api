@@ -47,8 +47,8 @@ export enum ActivityType {
 
 // Enum for reservation type
 export enum ReservationType {
-  WALK_IN = 'Walk-in',
-  ONLINE_BOOKING = 'Online-Booking',
+  WALK_IN = 'walk_in',
+  ONLINE_RESERVATION = 'online_reservation',
 }
 
 export enum ReservationStatus {
@@ -56,3 +56,22 @@ export enum ReservationStatus {
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
 }
+
+
+// Enum for the billing status
+export enum BillingStatus {
+  COMPLETE_PAYMENT = 'complete_payment',
+  PART_PAYMENT = 'part_payment',
+  REQUEST_REFUND = 'request_refund',
+  REFUNDED = 'refunded',
+}
+
+// Enum for the payment method
+export enum PaymentMethod {
+  CASH = 'cash',
+  BANK_TRANSFER = 'bank_transfer',
+  POS_TERMINAL = 'pos_terminal',
+  OTHERS = 'others',
+}
+
+

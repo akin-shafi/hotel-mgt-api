@@ -14,8 +14,11 @@ const ReservationService_1 = require("../services/ReservationService");
 const BillingEntity_1 = require("../entities/BillingEntity");
 const GuestService_1 = require("../services/GuestService");
 const ReservationEntity_1 = require("../entities/ReservationEntity");
+const BookedRoomEntity_1 = require("../entities/BookedRoomEntity");
 const data_source_1 = require("../data-source");
 const constants_1 = require("../constants");
+const PromotionEntity_1 = require("../entities/PromotionEntity");
+const RoomEntity_1 = require("../entities/RoomEntity");
 const reservationService = new ReservationService_1.ReservationService();
 class ReservationController {
     static createReservation(req, res) {
@@ -23,6 +26,8 @@ class ReservationController {
             const { guestDetails, reservationDetails, createdBy, role, billingDetails } = req.body;
             try {
                 const reservationRepo = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
+                const bookedRoomRepo = data_source_1.AppDataSource.getRepository(BookedRoomEntity_1.BookedRoom);
+                const promotionRepo = data_source_1.AppDataSource.getRepository(PromotionEntity_1.Promotion);
                 // Use the getGuestByEmail service to find an existing guest
                 let guest = yield GuestService_1.GuestService.getGuestByEmail(guestDetails.email);
                 if (!guest) {
@@ -34,8 +39,8 @@ class ReservationController {
                     where: {
                         guest: guest,
                         checkInDate: reservationDetails.checkInDate,
-                        checkOutDate: reservationDetails.checkOutDate
-                    }
+                        checkOutDate: reservationDetails.checkOutDate,
+                    },
                 });
                 if (existingReservation) {
                     return res.status(400).json({ error: "Reservation already exists for the same dates." });
@@ -44,7 +49,7 @@ class ReservationController {
                 if (!Object.values(constants_1.ReservationType).includes(reservationDetails.reservationType)) {
                     return res.status(400).json({ error: "Invalid reservation type." });
                 }
-                if (!Object.values(constants_1.ReservationStatus).includes(reservationDetails.status)) {
+                if (!Object.values(constants_1.ReservationStatus).includes(reservationDetails.reservationStatus)) {
                     return res.status(400).json({ error: "Invalid reservation status." });
                 }
                 // Start a transaction to ensure both reservation and billing are saved atomically
@@ -55,18 +60,47 @@ class ReservationController {
                         role }));
                     // Save the reservation first to ensure it has an ID for association
                     const savedReservation = yield transactionalEntityManager.save(newReservation);
+                    // Create booked rooms linked to the saved reservation
+                    for (const room of reservationDetails.rooms) {
+                        const roomEntity = yield transactionalEntityManager.findOne(RoomEntity_1.Room, { where: { roomName: room.roomName, hotelId: reservationDetails.hotelId } });
+                        if (roomEntity) {
+                            const bookedRoom = transactionalEntityManager.create(BookedRoomEntity_1.BookedRoom, {
+                                reservation: savedReservation,
+                                room: roomEntity,
+                                numberOfAdults: room.numberOfAdults,
+                                numberOfChildren: room.numberOfChildren,
+                                roomPrice: room.roomPrice,
+                                roomName: room.roomName,
+                            });
+                            yield transactionalEntityManager.save(bookedRoom);
+                        }
+                    }
+                    // Determine billing status
+                    const billingStatus = billingDetails.grandTotal > billingDetails.amountPaid
+                        ? constants_1.BillingStatus.PART_PAYMENT
+                        : constants_1.BillingStatus.COMPLETE_PAYMENT;
                     // Create the new billing linked to the saved reservation
-                    const newBilling = transactionalEntityManager.create(BillingEntity_1.Billing, Object.assign(Object.assign({}, billingDetails), { reservation: savedReservation }));
+                    const newBilling = transactionalEntityManager.create(BillingEntity_1.Billing, Object.assign(Object.assign({}, billingDetails), { reservation: savedReservation, status: billingStatus }));
                     // Save the billing details
                     yield transactionalEntityManager.save(newBilling);
+                    // Update the promotion record if a discount code is used
+                    if (billingDetails.discountCode) {
+                        const promotion = yield promotionRepo.findOne({
+                            where: {
+                                code: billingDetails.discountCode,
+                            },
+                        });
+                        if (promotion) {
+                            promotion.status = "used";
+                            promotion.usedBy = guestDetails.email;
+                            promotion.usedFor = `Reservation ID: ${savedReservation.id}`;
+                            yield transactionalEntityManager.save(promotion);
+                        }
+                    }
                     // Send response with the new reservation and billing details
-                    // res.status(201).json({
-                    //   reservation: savedReservation,
-                    //   billing: newBilling
-                    // });
                     res.status(200).json({
                         statusCode: 200,
-                        message: "Reservation successful"
+                        message: "Reservation successful",
                     });
                 }));
             }
@@ -76,14 +110,6 @@ class ReservationController {
             }
         });
     }
-    // static async getAllReservations(req: Request, res: Response) {
-    //   try {
-    //     const reservations = await ReservationService.getReservations();
-    //     res.json(reservations);
-    //   } catch (err) {
-    //     res.status(500).json({ error: err.message });
-    //   }
-    // }
     static getReservationsByHotelId(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -93,10 +119,13 @@ class ReservationController {
                     return res.status(400).json({ message: "Invalid hotelId provided." });
                 }
                 const reservations = yield ReservationService_1.ReservationService.getReservationsByHotelId(Number(hotelId));
+                // if (reservations.length === 0) {
+                //   return res
+                //     .status(404)
+                //     .json({ message: `No reservations found for hotel with ID ${hotelId}.` });
+                // }
                 if (reservations.length === 0) {
-                    return res
-                        .status(404)
-                        .json({ message: `No reservations found for hotel with ID ${hotelId}.` });
+                    return res.status(200).json([]);
                 }
                 res.status(200).json(reservations);
             }
@@ -108,10 +137,14 @@ class ReservationController {
     }
     static getReservation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { id } = req.params;
+            const { reservationId } = req.params;
+            // Check if the id parameter is a valid integer
+            if (isNaN(parseInt(reservationId))) {
+                return res.status(400).json({ message: "Invalid reservation ID" });
+            }
             try {
                 // Fetch the reservation with guest and billing details
-                const reservation = yield ReservationService_1.ReservationService.getReservationById(parseInt(id), ["guest", "billing"]);
+                const reservation = yield ReservationService_1.ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing"]);
                 if (!reservation) {
                     return res.status(404).json({ message: "Reservation not found" });
                 }

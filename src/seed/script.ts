@@ -1,9 +1,8 @@
 import { AppDataSource } from '../data-source';
 import { Guest } from '../entities/GuestEntity';
 import { Billing } from '../entities/BillingEntity';
-import { Reservation, ReservationStatus } from '../entities/ReservationEntity';
-import { BillingStatus, PaymentMethod } from '../entities/BillingEntity';
-import { ReservationType } from '../constants';
+import { Reservation,  } from '../entities/ReservationEntity';
+import { ReservationType, BillingStatus, PaymentMethod, ReservationStatus } from '../constants';
 
 // Sample guest data
 const guests = [
@@ -25,15 +24,15 @@ const guests = [
 const billings = [
   {
     amount: 100.50,
-    status: BillingStatus.UNPAID,
-    payment_method: PaymentMethod.CREDIT_CARD,
+    status: BillingStatus.COMPLETE_PAYMENT,
+    payment_method: PaymentMethod.POS_TERMINAL,
     due_date: new Date('2024-12-15'),
     billing_address: '123 Street, City, Country',
   },
   {
     amount: 200.75,
-    status: BillingStatus.PAID,
-    payment_method: PaymentMethod.PAYPAL,
+    status: BillingStatus.COMPLETE_PAYMENT,
+    payment_method: PaymentMethod.BANK_TRANSFER,
     payment_date: new Date('2024-11-30'),
     billing_address: '456 Avenue, City, Country',
   },
@@ -58,7 +57,7 @@ const reservations = [
     guest: guests[1],
     checkInDate: new Date('2024-12-10'),
     checkOutDate: new Date('2024-12-15'),
-    reservationType: ReservationType.ONLINE_BOOKING, // Corrected to use enum value
+    reservationType: ReservationType.ONLINE_RESERVATION, // Corrected to use enum value
     status: ReservationStatus.CONFIRMED, // Corrected to use enum value
     activity: 'In-House',
     paymentStatus: true,

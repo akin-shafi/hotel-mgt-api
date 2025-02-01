@@ -115,7 +115,7 @@ router.get('/activity-metrics', ReservationController_1.ReservationController.ge
  *         required: true
  *         description: ID of the reservation
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Successfully retrieved the reservation
@@ -172,6 +172,21 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *                     type: string
  *                   address:
  *                     type: string
+ *                   idProof:
+ *                     type: string
+ *                     nullable: true
+ *                   identityType:
+ *                     type: string
+ *                     nullable: true
+ *                   identityNumber:
+ *                     type: string
+ *                     nullable: true
+ *                   nationality:
+ *                     type: string
+ *                     nullable: true
+ *                   gender:
+ *                     type: string
+ *                     nullable: true
  *               reservationDetails:
  *                 type: object
  *                 properties:
@@ -202,37 +217,78 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *                       - Cancellation
  *                   paymentStatus:
  *                     type: boolean
- *                   confirmed:
- *                     type: boolean
- *                   specialRequest:
- *                     type: string
- *                     description: Optional special requests made by the guest.
  *                   confirmedDate:
  *                     type: string
  *                     format: date
  *                     description: Date when the reservation was confirmed (if applicable).
+ *                   specialRequest:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     description: Optional special requests made by the guest.
+ *                   notes:
+ *                     type: string
+ *                     nullable: true
  *               billingDetails:
  *                 type: object
  *                 properties:
- *                   amount:
+ *                   amountPaid:
  *                     type: number
  *                     format: float
+ *                   balance:
+ *                     type: number
+ *                     format: float
+ *                   excess:
+ *                     type: number
+ *                     format: float
+ *                     nullable: true
+ *                   totalPrice:
+ *                     type: number
+ *                     format: float
+ *                   grandTotal:
+ *                     type: number
+ *                     format: float
+ *                   isAddTax:
+ *                     type: boolean
+ *                     default: false
+ *                   taxValue:
+ *                     type: number
+ *                     format: float
+ *                     nullable: true
  *                   status:
  *                     type: string
  *                     enum:
- *                       - unpaid
- *                       - paid
+ *                       - complete_payment
+ *                       - part_payment
+ *                       - request_refund
  *                       - refunded
- *                   paymentMethod:
+ *                   payment_method:
  *                     type: string
  *                     enum:
  *                       - credit_card
  *                       - paypal
  *                       - cash
- *                   dueDate:
+ *                   discountCode:
+ *                     type: string
+ *                     nullable: true
+ *                   promotionType:
+ *                     type: string
+ *                     nullable: true
+ *                   promotionAmount:
+ *                     type: number
+ *                     format: float
+ *                     nullable: true
+ *                   due_date:
  *                     type: string
  *                     format: date
- *                     description: Optional due date for payment.
+ *                     nullable: true
+ *                   billing_address:
+ *                     type: string
+ *                     nullable: true
+ *                   payment_date:
+ *                     type: string
+ *                     format: date
+ *                     nullable: true
  *               createdBy:
  *                 type: string
  *               role:

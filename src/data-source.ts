@@ -14,6 +14,7 @@ import { Reservation } from './entities/ReservationEntity';
 import { HousekeepingTask } from './entities/HousekeepingTaskEntity';
 import { Billing } from './entities/BillingEntity';
 import { Promotion } from './entities/PromotionEntity';
+import { BookedRoom } from './entities/BookedRoomEntity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres', // PostgreSQL database type
@@ -31,7 +32,8 @@ export const AppDataSource = new DataSource({
     Reservation,  // Make sure this is included
     HousekeepingTask,
     Billing,
-    Promotion
+    Promotion,
+    BookedRoom
   ],
   synchronize: false, // Set to true in development, false in production
   logging: false,

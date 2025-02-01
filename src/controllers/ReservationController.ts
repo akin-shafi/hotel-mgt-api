@@ -4,8 +4,11 @@ import { Guest } from "../entities/GuestEntity";
 import { Billing } from "../entities/BillingEntity";
 import { GuestService } from "../services/GuestService";
 import { Reservation, } from "../entities/ReservationEntity";
+import { BookedRoom, } from "../entities/BookedRoomEntity";
 import { AppDataSource } from '../data-source';
-import { ActivityType, ReservationStatus, ReservationType  } from "../constants"
+import { ActivityType, ReservationStatus, ReservationType, BillingStatus  } from "../constants"
+import { Promotion } from "../entities/PromotionEntity";
+import { Room } from "../entities/RoomEntity";
 
 
 const reservationService = new ReservationService();
@@ -17,6 +20,8 @@ export class ReservationController {
   
     try {
       const reservationRepo = AppDataSource.getRepository(Reservation);
+      const bookedRoomRepo = AppDataSource.getRepository(BookedRoom);
+      const promotionRepo = AppDataSource.getRepository(Promotion);
   
       // Use the getGuestByEmail service to find an existing guest
       let guest = await GuestService.getGuestByEmail(guestDetails.email);
@@ -31,8 +36,8 @@ export class ReservationController {
         where: {
           guest: guest,
           checkInDate: reservationDetails.checkInDate,
-          checkOutDate: reservationDetails.checkOutDate
-        }
+          checkOutDate: reservationDetails.checkOutDate,
+        },
       });
   
       if (existingReservation) {
@@ -44,7 +49,7 @@ export class ReservationController {
         return res.status(400).json({ error: "Invalid reservation type." });
       }
   
-      if (!Object.values(ReservationStatus).includes(reservationDetails.status)) {
+      if (!Object.values(ReservationStatus).includes(reservationDetails.reservationStatus)) {
         return res.status(400).json({ error: "Invalid reservation status." });
       }
   
@@ -61,26 +66,60 @@ export class ReservationController {
         // Save the reservation first to ensure it has an ID for association
         const savedReservation = await transactionalEntityManager.save(newReservation);
   
+        // Create booked rooms linked to the saved reservation
+        for (const room of reservationDetails.rooms) {
+          const roomEntity = await transactionalEntityManager.findOne(Room, { where: { roomName: room.roomName, hotelId: reservationDetails.hotelId } });
+          if (roomEntity) {
+            const bookedRoom = transactionalEntityManager.create(BookedRoom, {
+              reservation: savedReservation,
+              room: roomEntity,
+              numberOfAdults: room.numberOfAdults,
+              numberOfChildren: room.numberOfChildren,
+              roomPrice: room.roomPrice,
+              roomName: room.roomName,
+            });
+            await transactionalEntityManager.save(bookedRoom);
+          }
+        }
+  
+        // Determine billing status
+        const billingStatus =
+          billingDetails.grandTotal > billingDetails.amountPaid
+            ? BillingStatus.PART_PAYMENT
+            : BillingStatus.COMPLETE_PAYMENT;
+  
         // Create the new billing linked to the saved reservation
         const newBilling = transactionalEntityManager.create(Billing, {
           ...billingDetails, // Assume billingDetails contains necessary info such as billing address, payment method, etc.
           reservation: savedReservation, // Link billing to the saved reservation
+          status: billingStatus, // Set the billing status
         });
   
         // Save the billing details
         await transactionalEntityManager.save(newBilling);
   
+        // Update the promotion record if a discount code is used
+        if (billingDetails.discountCode) {
+          const promotion = await promotionRepo.findOne({
+            where: {
+              code: billingDetails.discountCode,
+            },
+          });
+  
+          if (promotion) {
+            promotion.status = "used";
+            promotion.usedBy = guestDetails.email;
+            promotion.usedFor = `Reservation ID: ${savedReservation.id}`;
+            await transactionalEntityManager.save(promotion);
+          }
+        }
+  
         // Send response with the new reservation and billing details
-        // res.status(201).json({
-        //   reservation: savedReservation,
-        //   billing: newBilling
-        // });
         res.status(200).json({
           statusCode: 200,
-          message: "Reservation successful"
+          message: "Reservation successful",
         });
       });
-  
     } catch (error) {
       console.error("Error creating reservation:", error.message);
       res.status(500).json({ error: error.message });
@@ -88,14 +127,7 @@ export class ReservationController {
   }
   
   
-  // static async getAllReservations(req: Request, res: Response) {
-  //   try {
-  //     const reservations = await ReservationService.getReservations();
-  //     res.json(reservations);
-  //   } catch (err) {
-  //     res.status(500).json({ error: err.message });
-  //   }
-  // }
+  
 
   static async getReservationsByHotelId(req: Request, res: Response) {
     try {
@@ -107,12 +139,17 @@ export class ReservationController {
       }
 
       const reservations = await ReservationService.getReservationsByHotelId(Number(hotelId));
+     
+      // if (reservations.length === 0) {
+      //   return res
+      //     .status(404)
+      //     .json({ message: `No reservations found for hotel with ID ${hotelId}.` });
+      // }
 
       if (reservations.length === 0) {
-        return res
-          .status(404)
-          .json({ message: `No reservations found for hotel with ID ${hotelId}.` });
+        return res.status(200).json([]);
       }
+      
 
       res.status(200).json(reservations);
     } catch (error) {
@@ -123,11 +160,17 @@ export class ReservationController {
   
   
 
-  static async getReservation(req: Request, res: Response) {
-    const { id } = req.params;
+  static async getReservation(req, res) {
+    const { reservationId } = req.params;
+  
+    // Check if the id parameter is a valid integer
+    if (isNaN(parseInt(reservationId))) {
+      return res.status(400).json({ message: "Invalid reservation ID" });
+    }
+  
     try {
       // Fetch the reservation with guest and billing details
-      const reservation = await ReservationService.getReservationById(parseInt(id), ["guest", "billing"]);
+      const reservation = await ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing"]);
   
       if (!reservation) {
         return res.status(404).json({ message: "Reservation not found" });
@@ -146,6 +189,7 @@ export class ReservationController {
       res.status(500).json({ error: err.message });
     }
   }
+  
   
 
  // Create

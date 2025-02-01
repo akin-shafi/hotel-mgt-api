@@ -13,7 +13,6 @@ const data_source_1 = require("../data-source");
 const GuestEntity_1 = require("../entities/GuestEntity");
 const BillingEntity_1 = require("../entities/BillingEntity");
 const ReservationEntity_1 = require("../entities/ReservationEntity");
-const BillingEntity_2 = require("../entities/BillingEntity");
 const constants_1 = require("../constants");
 // Sample guest data
 const guests = [
@@ -34,15 +33,15 @@ const guests = [
 const billings = [
     {
         amount: 100.50,
-        status: BillingEntity_2.BillingStatus.UNPAID,
-        payment_method: BillingEntity_2.PaymentMethod.CREDIT_CARD,
+        status: constants_1.BillingStatus.COMPLETE_PAYMENT,
+        payment_method: constants_1.PaymentMethod.POS_TERMINAL,
         due_date: new Date('2024-12-15'),
         billing_address: '123 Street, City, Country',
     },
     {
         amount: 200.75,
-        status: BillingEntity_2.BillingStatus.PAID,
-        payment_method: BillingEntity_2.PaymentMethod.PAYPAL,
+        status: constants_1.BillingStatus.COMPLETE_PAYMENT,
+        payment_method: constants_1.PaymentMethod.BANK_TRANSFER,
         payment_date: new Date('2024-11-30'),
         billing_address: '456 Avenue, City, Country',
     },
@@ -54,7 +53,7 @@ const reservations = [
         checkInDate: new Date('2024-12-01'),
         checkOutDate: new Date('2024-12-05'),
         reservationType: constants_1.ReservationType.WALK_IN, // Corrected to use enum value
-        status: ReservationEntity_1.ReservationStatus.PENDING, // Corrected to use enum value
+        status: constants_1.ReservationStatus.PENDING, // Corrected to use enum value
         activity: 'Arrival',
         paymentStatus: false,
         confirmed: false,
@@ -66,8 +65,8 @@ const reservations = [
         guest: guests[1],
         checkInDate: new Date('2024-12-10'),
         checkOutDate: new Date('2024-12-15'),
-        reservationType: constants_1.ReservationType.ONLINE_BOOKING, // Corrected to use enum value
-        status: ReservationEntity_1.ReservationStatus.CONFIRMED, // Corrected to use enum value
+        reservationType: constants_1.ReservationType.ONLINE_RESERVATION, // Corrected to use enum value
+        status: constants_1.ReservationStatus.CONFIRMED, // Corrected to use enum value
         activity: 'In-House',
         paymentStatus: true,
         confirmed: true,

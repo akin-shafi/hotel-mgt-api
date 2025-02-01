@@ -23,6 +23,21 @@ export class Guest {
   @Column({ nullable: true })
   address: string;
 
+  @Column({ nullable: true })
+  idProof: string; // New field for ID proof
+
+  @Column({ nullable: true })
+  identityType: string; // New field for identity type
+
+  @Column({ nullable: true })
+  identityNumber: string; // New field for identity number
+
+  @Column({ nullable: true })
+  nationality: string; // New field for nationality
+
+  @Column({ nullable: true })
+  gender: string; // New field for gender
+
   @OneToMany(() => Reservation, (reservation) => reservation.guest)
   reservations: Reservation[];
 

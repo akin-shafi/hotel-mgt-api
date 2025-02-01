@@ -1,7 +1,7 @@
 import { AppDataSource } from "../data-source"; // Your database connection
 import { Reservation } from "../entities/ReservationEntity";
 import { Repository, In } from "typeorm";
-import {ActivityType, ReservationType } from "../constants"
+import {ActivityType, ReservationStatus, ReservationType } from "../constants"
 
 let reservationRepository: Repository<Reservation>;
 
@@ -64,52 +64,56 @@ export class ReservationService {
     }
   }
   
-  
 
-  // static async getReservationsByHotelId(hotelId: number): Promise<Reservation[]> {
-  //   return await reservationRepository.find({
-  //     where: { hotel: { id: hotelId } }, // Assuming a Many-to-One relation between Reservation and Hotel
-  //     relations: ["guest", "billing", "hotel"], // Include related entities
-  //   });
-  // }
 
   static async getReservationsByHotelId(hotelId: number): Promise<any[]> {
-    // Fetch reservations by hotelId
-    const reservations = await reservationRepository.find({
-      where: { hotel: { id: hotelId } }, // Assuming a Many-to-One relation between Reservation and Hotel
-      relations: ["guest", "billing", "hotel"], // Include related entities
-    });
+    try {
+      // Fetch reservations by hotelId
+      const reservations = await reservationRepository.find({
+        where: { hotel: { id: hotelId } },
+        relations: ["guest", "billing", "hotel", "bookedRooms", "bookedRooms.room"], // Include related entities
+      });
   
-    // Map reservations to the desired structure
-    const guests = reservations.map((reservation) => {
-      // Calculate the number of nights
-      const checkInDate = new Date(reservation.checkInDate);
-      const checkOutDate = new Date(reservation.checkOutDate);
-      const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24));
-  
-      // Format the dates as "MM/DD/YY - MM/DD/YY"
-      const dates = `${checkInDate.toLocaleDateString('en-US')} - ${checkOutDate.toLocaleDateString('en-US')}`;
-  
-      return {
-        id: reservation.id.toString(),
-        name: reservation.guest.fullName,
-        room: reservation.roomName,
-        dates: dates,
-        nights: nights,
-        guests: reservation.adults + reservation.children, // Sum of adults and children
-        beds: reservation.beds || 1, // Assuming at least 1 bed if none specified
-        email: reservation.guest.email,
-        phone: reservation.guest.phone,
-        specialRequests: reservation.specialRequest.join(", "), // Join array as comma-separated string
-        notes: reservation.notes || '', // If notes are available
-        status: reservation.status,
-        activity: reservation.activity || 'arrivals', // Default to 'arrivals' if activity is not specified
-      };
-    });
-  
-    return guests;
-  }
+      // Map reservations to the desired structure
+      const guests = reservations.map((reservation) => {
+        // console.log("Check reservation", reservation)
+        const checkInDate = new Date(reservation.checkInDate);
+        const checkOutDate = new Date(reservation.checkOutDate);
+        const dates = `${checkInDate.toLocaleDateString('en-US')} - ${checkOutDate.toLocaleDateString('en-US')}`;
+        const createdAt = reservation.createdAt;
+        const formattedDate = new Date(createdAt).toISOString().split('T')[0];
 
+        // Aggregate the details of booked rooms
+        const roomDetails = reservation.bookedRooms.map(bookedRoom => ({
+          roomName: bookedRoom.room.roomName,
+          numberOfAdults: bookedRoom.numberOfAdults,
+          numberOfChildren: bookedRoom.numberOfChildren,
+          roomPrice: bookedRoom.roomPrice,
+        }));
+  
+        return {
+          id: reservation.id.toString(),
+          name: reservation.guest.fullName,
+          rooms: roomDetails,
+          dates: dates,
+          email: reservation.guest.email,
+          phone: reservation.guest.phone,
+          specialRequests: reservation.specialRequest ? reservation.specialRequest.join(", ") : "", // Join array as comma-separated string or default to empty string
+          notes: reservation.notes || '', // If notes are available
+          status: reservation.reservationStatus,
+          activity: reservation.activity || 'arrivals', // Default to 'arrivals' if activity is not specified
+          createdAt: formattedDate
+        };
+      });
+  
+      return guests;
+    } catch (error) {
+      console.error("Error fetching reservations by hotelId:", error.message);
+      throw error;
+    }
+  }
+  
+  
   static async getReservationById(id: number, relations: string[] = []): Promise<Reservation | null> {
     const reservationRepo = AppDataSource.getRepository(Reservation);
   
@@ -158,7 +162,7 @@ export class ReservationService {
       return { activity: "Cancellation", cta: ["Confirm Cancellation", "Reject Cancellation"] };
     }
 
-    if (reservation.reservationType === ReservationType.ONLINE_BOOKING && !reservation.confirmed) {
+    if (reservation.reservationType === ReservationType.ONLINE_RESERVATION && reservation.reservationStatus === ReservationStatus.CONFIRMED) {
       return { activity: "Bookings", cta: ["Confirm"] };
     }
 

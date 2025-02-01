@@ -27,6 +27,10 @@ __decorate([
     __metadata("design:type", String)
 ], Promotion.prototype, "type", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Promotion.prototype, "amount", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: "active" }),
     __metadata("design:type", String)
 ], Promotion.prototype, "status", void 0);

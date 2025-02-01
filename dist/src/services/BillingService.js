@@ -31,11 +31,11 @@ class BillingService {
             if (!bill)
                 throw new Error('Bill not found');
             // Assign the enum value for "paid"
-            bill.status = BillingEntity_1.BillingStatus.PAID;
+            bill.status = constants_1.BillingStatus.COMPLETE_PAYMENT;
             yield billingRepository.save(bill);
             // Optionally, update reservation status to "completed"
             const reservation = bill.reservation;
-            reservation.status = constants_1.ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
+            reservation.reservationStatus = constants_1.ReservationStatus.CONFIRMED; // Ensure 'completed' is valid in the Reservation entity
             yield reservationRepository.save(reservation);
             return bill;
         });

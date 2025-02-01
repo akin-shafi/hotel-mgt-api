@@ -10,10 +10,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Room = void 0;
-// src/entities/RoomEntity.ts
 const typeorm_1 = require("typeorm");
-// import { Hotel } from './HotelEntity';
-const constants_1 = require("../constants"); // Assuming MaintenanceStatus is an enum in your constants file
+const constants_1 = require("../constants");
+// import { Reservation } from './ReservationEntity';
 let Room = class Room {
 };
 exports.Room = Room;

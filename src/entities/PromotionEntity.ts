@@ -19,6 +19,9 @@ import {
   
     @Column()
     type: string;
+
+    @Column({nullable: true})
+    amount: number;
   
     @Column({ default: "active" })
     status: string;

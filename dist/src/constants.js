@@ -1,7 +1,7 @@
 "use strict";
 // src/constants.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReservationStatus = exports.ReservationType = exports.ActivityType = exports.MaintenanceStatus = exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
+exports.PaymentMethod = exports.BillingStatus = exports.ReservationStatus = exports.ReservationType = exports.ActivityType = exports.MaintenanceStatus = exports.OnboardingStatus = exports.AccountStatus = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["Admin"] = "admin";
@@ -48,8 +48,8 @@ var ActivityType;
 // Enum for reservation type
 var ReservationType;
 (function (ReservationType) {
-    ReservationType["WALK_IN"] = "Walk-in";
-    ReservationType["ONLINE_BOOKING"] = "Online-Booking";
+    ReservationType["WALK_IN"] = "walk_in";
+    ReservationType["ONLINE_RESERVATION"] = "online_reservation";
 })(ReservationType || (exports.ReservationType = ReservationType = {}));
 var ReservationStatus;
 (function (ReservationStatus) {
@@ -57,3 +57,19 @@ var ReservationStatus;
     ReservationStatus["CONFIRMED"] = "confirmed";
     ReservationStatus["CANCELLED"] = "cancelled";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));
+// Enum for the billing status
+var BillingStatus;
+(function (BillingStatus) {
+    BillingStatus["COMPLETE_PAYMENT"] = "complete_payment";
+    BillingStatus["PART_PAYMENT"] = "part_payment";
+    BillingStatus["REQUEST_REFUND"] = "request_refund";
+    BillingStatus["REFUNDED"] = "refunded";
+})(BillingStatus || (exports.BillingStatus = BillingStatus = {}));
+// Enum for the payment method
+var PaymentMethod;
+(function (PaymentMethod) {
+    PaymentMethod["CASH"] = "cash";
+    PaymentMethod["BANK_TRANSFER"] = "bank_transfer";
+    PaymentMethod["POS_TERMINAL"] = "pos_terminal";
+    PaymentMethod["OTHERS"] = "others";
+})(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));

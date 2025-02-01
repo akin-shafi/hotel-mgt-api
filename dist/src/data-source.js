@@ -18,6 +18,7 @@ const ReservationEntity_1 = require("./entities/ReservationEntity");
 const HousekeepingTaskEntity_1 = require("./entities/HousekeepingTaskEntity");
 const BillingEntity_1 = require("./entities/BillingEntity");
 const PromotionEntity_1 = require("./entities/PromotionEntity");
+const BookedRoomEntity_1 = require("./entities/BookedRoomEntity");
 exports.AppDataSource = new typeorm_1.DataSource({
     type: 'postgres', // PostgreSQL database type
     host: process.env.DB_HOST || 'localhost',
@@ -34,7 +35,8 @@ exports.AppDataSource = new typeorm_1.DataSource({
         ReservationEntity_1.Reservation, // Make sure this is included
         HousekeepingTaskEntity_1.HousekeepingTask,
         BillingEntity_1.Billing,
-        PromotionEntity_1.Promotion
+        PromotionEntity_1.Promotion,
+        BookedRoomEntity_1.BookedRoom
     ],
     synchronize: false, // Set to true in development, false in production
     logging: false,

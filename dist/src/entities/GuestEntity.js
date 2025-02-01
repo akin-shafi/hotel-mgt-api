@@ -42,6 +42,26 @@ __decorate([
     __metadata("design:type", String)
 ], Guest.prototype, "address", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Guest.prototype, "idProof", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Guest.prototype, "identityType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Guest.prototype, "identityNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Guest.prototype, "nationality", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Guest.prototype, "gender", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => ReservationEntity_1.Reservation, (reservation) => reservation.guest),
     __metadata("design:type", Array)
 ], Guest.prototype, "reservations", void 0);

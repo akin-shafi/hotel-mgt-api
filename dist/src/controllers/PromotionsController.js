@@ -21,12 +21,15 @@ class PromotionsController {
             try {
                 const promotion = yield promotionRepository.findOne({ where: { code } });
                 if (!promotion) {
-                    return res.status(404).json({ message: "Promotion not found" });
+                    return res.status(404).json({ status: 404, message: "Promotion code not found" });
                 }
-                res.json(promotion);
+                if (promotion.status != "active") {
+                    return res.status(404).json({ status: 209, message: "Promotion code is inactive" });
+                }
+                res.json({ status: 200, result: promotion, message: "record found" });
             }
             catch (error) {
-                res.status(500).json({ message: "Internal server error", error });
+                res.status(500).json({ status: 500, message: "Internal server error", error });
             }
         });
     }
