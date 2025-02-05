@@ -98,22 +98,27 @@ class UserController {
     register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { firstName, lastName, email, password, role, actionType } = req.body;
-                // Validate required fields
-                // if (!firstName || !lastName || !email ) {
-                //   return res.status(400).json({ message: 'Required fields are missing (firstName, lastName, email, tenantId)' });
-                // }
+                const { firstName, lastName, email, password, role, actionType, username } = req.body;
                 if (!actionType) {
                     return res.status(400).json({ message: 'Action Type field is missing' });
                 }
-                // Normalize email
+                if (!username) {
+                    return res.status(400).json({ message: 'Username field is missing' });
+                }
+                // Normalize email and username
                 const normalizedEmail = email.trim().toLowerCase();
+                const normalizedUsername = username.trim().toLowerCase();
                 // Check if password is empty; if so, generate a temporary password
                 const effectivePassword = password ? password : (0, uuid_1.v4)().slice(0, 8);
                 // Check if the user already exists in the same tenant
-                const existingUser = yield userService.findByEmail(normalizedEmail);
-                if (existingUser) {
+                const existingUserByEmail = yield userService.findByEmail(normalizedEmail);
+                if (existingUserByEmail) {
                     return res.status(400).json({ message: 'User with this email already exists in the specified hotel' });
+                }
+                // Check if the username already exists in the same tenant
+                const existingUserByUsername = yield userService.findByUsername(normalizedUsername);
+                if (existingUserByUsername) {
+                    return res.status(400).json({ message: 'Username already exists in the specified hotel' });
                 }
                 // Generate application number (e.g., Employee ID)
                 const employeeId = yield this.generateTenantId(role);
@@ -124,6 +129,7 @@ class UserController {
                 const newUser = yield userService.create({
                     firstName,
                     lastName,
+                    username: normalizedUsername,
                     email: normalizedEmail,
                     password: hashedPassword,
                     role,
@@ -148,12 +154,15 @@ class UserController {
     registerAndSendVerificationCode(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email, firstName, lastName, password, loginType } = req.body;
+                const { email, firstName, lastName, password, loginType, username } = req.body;
                 if (!email) {
                     return res.status(400).json({ message: 'User email is required' });
                 }
                 if (!password) {
                     return res.status(400).json({ message: 'Password is required' });
+                }
+                if (!username) {
+                    return res.status(400).json({ message: 'Username is required' });
                 }
                 const role = constants_1.UserRole.Admin;
                 // Generate TenantID number (e.g., TenantID)
@@ -162,17 +171,26 @@ class UserController {
                     firstName,
                     lastName,
                     email,
+                    username,
                     role,
                     isVerified: true,
                     tenantId
                 };
+                // Normalize email and username
+                const normalizedEmail = email.trim().toLowerCase();
+                const normalizedUsername = username.trim().toLowerCase();
                 // Check if the user already exists
-                let user = yield userService.findByEmail(email);
+                let user = yield userService.findByEmail(normalizedEmail);
                 if (!user) {
+                    // Check if the username already exists in the same tenant
+                    const existingUserByUsername = yield userService.findByUsername(normalizedUsername);
+                    if (existingUserByUsername) {
+                        return res.status(400).json({ message: 'Username already exists in the specified hotel' });
+                    }
                     // Hash the password
                     const hashedPassword = yield bcrypt_1.default.hash(password, 10);
                     // If user does not exist, create a new user with the email
-                    user = yield userService.create(Object.assign(Object.assign({}, dataToSave), { password: hashedPassword }));
+                    user = yield userService.create(Object.assign(Object.assign({}, dataToSave), { password: hashedPassword, username: normalizedUsername }));
                 }
                 const userId = user.id;
                 // Generate and send the two-factor token
@@ -187,7 +205,7 @@ class UserController {
     }
     generateTenantId(role) {
         return __awaiter(this, void 0, void 0, function* () {
-            const prefix = role === 'admin' ? 'adm' : 'emp';
+            const prefix = role === 'admin' ? 'h' : 'emp';
             const uniqueId = (0, uuid_1.v4)().slice(0, 8).toUpperCase(); // Unique part of the application number
             return `${prefix}-${uniqueId}`;
         });
@@ -445,16 +463,23 @@ class UserController {
             try {
                 const secret = process.env.JWT_SECRET || 'your-secret-key';
                 const userRepository = data_source_1.AppDataSource.getRepository(UserEntity_1.User);
-                const { email, password } = req.body;
-                // Find user by email
-                const user = yield userRepository.findOne({ where: { email } });
+                const { email, username, password, tenantId } = req.body;
+                let user;
+                if (email) {
+                    // Find user by email
+                    user = yield userRepository.findOne({ where: { email } });
+                }
+                else if (username && tenantId) {
+                    // Find user by username and tenantId
+                    user = yield userRepository.findOne({ where: { username, tenantId } });
+                }
                 if (!user) {
-                    return res.status(400).json({ statusCode: 400, message: 'Invalid email or password' });
+                    return res.status(400).json({ statusCode: 400, message: 'Invalid credentials' });
                 }
                 // Check if password is correct
                 const isValidPassword = yield bcrypt_1.default.compare(password, user.password);
                 if (!isValidPassword) {
-                    return res.status(400).json({ statusCode: 400, message: 'Invalid email or password' });
+                    return res.status(400).json({ statusCode: 400, message: 'Invalid credentials' });
                 }
                 // Check if user email is verified
                 if (!user.isVerified) {
@@ -481,6 +506,7 @@ class UserController {
                         firstName: user.firstName,
                         lastName: user.lastName,
                         email: user.email,
+                        username: user.username,
                         resetPassword: user.resetPassword,
                         onboardingStep: user.onboardingStep,
                         tenantId: user.tenantId,

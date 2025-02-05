@@ -131,46 +131,86 @@ router.post('/test-email', UserController_1.default.testEmail);
  */
 router.post('/submit-email', UserController_1.default.registerAndSendVerificationCode);
 /**
- * @swagger
- * /users/login:
- *   post:
- *     summary: User login
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 default: "engineering@copora.com"
- *                 description: User email
- *               password:
- *                 type: string
- *                 default: "password"
- *                 format: password
- *                 description: User password
- *     responses:
- *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: JWT token
- *       400:
- *         description: Invalid email or password
- *       500:
- *         description: Server error
- */
+* @swagger
+* /users/login:
+*   post:
+*     summary: User login
+*     tags: [Authentication]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             required:
+*               - password
+*             properties:
+*               email:
+*                 type: string
+*                 example: "engineering@copora.com"
+*                 description: User email
+*               username:
+*                 type: string
+*                 example: "user123"
+*                 description: Username
+*               tenantId:
+*                 type: string
+*                 example: "tenant123"
+*                 description: Tenant ID
+*               password:
+*                 type: string
+*                 example: "password"
+*                 format: password
+*                 description: User password
+*     responses:
+*       200:
+*         description: Login successful
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 token:
+*                   type: string
+*                   description: JWT token
+*                 user:
+*                   type: object
+*                   properties:
+*                     userId:
+*                       type: string
+*                       description: User ID
+*                     role:
+*                       type: string
+*                       description: User role
+*                     firstName:
+*                       type: string
+*                       description: First name
+*                     lastName:
+*                       type: string
+*                       description: Last name
+*                     email:
+*                       type: string
+*                       description: User email
+*                     username:
+*                       type: string
+*                       description: Username
+*                     tenantId:
+*                       type: string
+*                       description: Tenant ID
+*                     hotelId:
+*                       type: string
+*                       description: Hotel ID
+*                     hotelName:
+*                       type: string
+*                       description: Hotel name
+*                     profilePicture:
+*                       type: string
+*                       description: Profile picture URL
+*       400:
+*         description: Invalid credentials
+*       500:
+*         description: Server error
+*/
 router.post('/login', UserController_1.default.login);
 /**
  * @swagger

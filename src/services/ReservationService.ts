@@ -72,17 +72,17 @@ export class ReservationService {
       const reservations = await reservationRepository.find({
         where: { hotel: { id: hotelId } },
         relations: ["guest", "billing", "hotel", "bookedRooms", "bookedRooms.room"], // Include related entities
+        order: { id: "DESC" } // Sort by id in descending order
       });
   
       // Map reservations to the desired structure
       const guests = reservations.map((reservation) => {
-        // console.log("Check reservation", reservation)
         const checkInDate = new Date(reservation.checkInDate);
         const checkOutDate = new Date(reservation.checkOutDate);
         const dates = `${checkInDate.toLocaleDateString('en-US')} - ${checkOutDate.toLocaleDateString('en-US')}`;
         const createdAt = reservation.createdAt;
         const formattedDate = new Date(createdAt).toISOString().split('T')[0];
-
+  
         // Aggregate the details of booked rooms
         const roomDetails = reservation.bookedRooms.map(bookedRoom => ({
           roomName: bookedRoom.room.roomName,
@@ -114,14 +114,71 @@ export class ReservationService {
   }
   
   
-  static async getReservationById(id: number, relations: string[] = []): Promise<Reservation | null> {
-    const reservationRepo = AppDataSource.getRepository(Reservation);
   
-    return reservationRepo.findOne({
-      where: { id },
-      relations, // Dynamically include the specified relations
-    });
+  // static async getReservationById(id: number, relations: string[] = []): Promise<Reservation | null> {
+  //   const reservationRepo = AppDataSource.getRepository(Reservation);
+  
+  //   return reservationRepo.findOne({
+  //     where: { id },
+  //     relations, // Dynamically include the specified relations
+  //   });
+  // }
+
+  static async getReservationById(id: number, relations: string[] = []): Promise<any | null> {
+    try {
+      const reservationRepo = AppDataSource.getRepository(Reservation);
+      const reservation = await reservationRepo.findOne({
+        where: { id },
+        relations, // Dynamically include the specified relations
+      });
+  
+      if (!reservation) {
+        return null;
+      }
+  
+      const checkInDate = new Date(reservation.checkInDate);
+      const checkOutDate = new Date(reservation.checkOutDate);
+      const numberOfNights = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24);
+  
+      // Aggregate the details of booked rooms
+      const roomDetails = reservation.bookedRooms.map(bookedRoom => ({
+        roomName: bookedRoom.room.roomName,
+        numberOfAdults: bookedRoom.numberOfAdults,
+        numberOfChildren: bookedRoom.numberOfChildren,
+        roomPrice: bookedRoom.roomPrice,
+      }));
+
+     
+  
+      const formattedReservation = {
+        id: reservation.id.toString(),
+        checkInDate: reservation.checkInDate,
+        checkOutDate: reservation.checkOutDate,
+        hotelId: reservation.hotelId,
+        activity: reservation.activity,
+        reservationType: reservation.reservationType,
+        reservationStatus: reservation.reservationStatus,
+        paymentStatus: reservation.paymentStatus,
+        createdBy: reservation.createdBy,
+        numberOfNights: numberOfNights,
+        role: reservation.role,
+        createdAt: reservation.createdAt,
+        updatedAt: reservation.updatedAt,
+        specialRequest: reservation.specialRequest,
+        notes: reservation.notes,
+        confirmedDate: reservation.confirmedDate,
+        guest: reservation.guest,
+        billing: reservation.billing,
+        bookedRooms: roomDetails,
+      };
+  
+      return formattedReservation;
+    } catch (error) {
+      console.error("Error fetching reservation by id:", error.message);
+      throw error;
+    }
   }
+  
   
 
     /**

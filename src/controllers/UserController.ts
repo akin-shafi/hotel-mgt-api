@@ -74,33 +74,37 @@ class UserController {
 
   public async register(req: Request, res: Response): Promise<Response> {
     try {
-      const { firstName, lastName, email, password, role, actionType } = req.body;
-  
-      // Validate required fields
-      // if (!firstName || !lastName || !email ) {
-      //   return res.status(400).json({ message: 'Required fields are missing (firstName, lastName, email, tenantId)' });
-      // }
+      const { firstName, lastName, email, password, role, actionType, username } = req.body;
   
       if (!actionType) {
         return res.status(400).json({ message: 'Action Type field is missing' });
       }
   
-      
-      // Normalize email
+      if (!username) {
+        return res.status(400).json({ message: 'Username field is missing' });
+      }
+  
+      // Normalize email and username
       const normalizedEmail = email.trim().toLowerCase();
+      const normalizedUsername = username.trim().toLowerCase();
   
       // Check if password is empty; if so, generate a temporary password
       const effectivePassword = password ? password : uuidv4().slice(0, 8);
   
       // Check if the user already exists in the same tenant
-      const existingUser = await userService.findByEmail(normalizedEmail);
-      if (existingUser) {
+      const existingUserByEmail = await userService.findByEmail(normalizedEmail);
+      if (existingUserByEmail) {
         return res.status(400).json({ message: 'User with this email already exists in the specified hotel' });
+      }
+  
+      // Check if the username already exists in the same tenant
+      const existingUserByUsername = await userService.findByUsername(normalizedUsername);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: 'Username already exists in the specified hotel' });
       }
   
       // Generate application number (e.g., Employee ID)
       const employeeId = await this.generateTenantId(role);
-
   
       // Hash the effective password
       const hashedPassword = await bcrypt.hash(effectivePassword, 10);
@@ -110,6 +114,7 @@ class UserController {
       const newUser = await userService.create({
         firstName,
         lastName,
+        username: normalizedUsername,
         email: normalizedEmail,
         password: hashedPassword,
         role,
@@ -131,63 +136,78 @@ class UserController {
         : undefined;
     }
   }
+  
 
   public async registerAndSendVerificationCode(req: Request, res: Response) {
     try {
-        const { email, firstName, lastName, password, loginType } = req.body;
-
-        if (!email) {
-            return res.status(400).json({ message: 'User email is required' });
+      const { email, firstName, lastName, password, loginType, username } = req.body;
+  
+      if (!email) {
+        return res.status(400).json({ message: 'User email is required' });
+      }
+  
+      if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+      }
+  
+      if (!username) {
+        return res.status(400).json({ message: 'Username is required' });
+      }
+  
+      const role = UserRole.Admin;
+  
+      // Generate TenantID number (e.g., TenantID)
+      const tenantId = await UserService.generateTenantId(role);
+  
+      const dataToSave = {
+        firstName,
+        lastName,
+        email,
+        username,
+        role,
+        isVerified: true,
+        tenantId
+      }
+  
+      // Normalize email and username
+      const normalizedEmail = email.trim().toLowerCase();
+      const normalizedUsername = username.trim().toLowerCase();
+  
+      // Check if the user already exists
+      let user = await userService.findByEmail(normalizedEmail);
+  
+      if (!user) {
+        // Check if the username already exists in the same tenant
+        const existingUserByUsername = await userService.findByUsername(normalizedUsername);
+        if (existingUserByUsername) {
+          return res.status(400).json({ message: 'Username already exists in the specified hotel' });
         }
-
-        if (!password) {
-            return res.status(400).json({ message: 'Password is required' });
-        }
-
-        const role = UserRole.Admin;
-
-        // Generate TenantID number (e.g., TenantID)
-        const tenantId = await UserService.generateTenantId(role);
-
-        const dataToSave = {
-            firstName,
-            lastName,
-            email,
-            role,
-            isVerified: true,
-            tenantId
-        }
-
-        // Check if the user already exists
-        let user = await userService.findByEmail(email);
-
-        if (!user) {
-            // Hash the password
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // If user does not exist, create a new user with the email
-            user = await userService.create({ ...dataToSave, password: hashedPassword });
-        }
-
-        const userId = user.id;
-
-        // Generate and send the two-factor token
-        await userService.generateAndSendTwoFactorToken(userId, loginType);
-
-        res.status(200).json({ message: 'Verification code sent' });
+  
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+  
+        // If user does not exist, create a new user with the email
+        user = await userService.create({ ...dataToSave, password: hashedPassword, username: normalizedUsername });
+      }
+  
+      const userId = user.id;
+  
+      // Generate and send the two-factor token
+      await userService.generateAndSendTwoFactorToken(userId, loginType);
+  
+      res.status(200).json({ message: 'Verification code sent' });
     } catch (error) {
-        console.error('Error registering and sending verification code:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+      console.error('Error registering and sending verification code:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
   }
+  
 
   private async generateTenantId(role: string): Promise<string> {
-    const prefix = role === 'admin' ? 'adm' : 'emp';
+    const prefix = role === 'admin' ? 'h' : 'emp';
     const uniqueId = uuidv4().slice(0, 8).toUpperCase(); // Unique part of the application number
     return `${prefix}-${uniqueId}`;
   }
-
-  
   
   private async uploadProfilePicture(file: Express.Multer.File | undefined): Promise<string> {
     if (!file) return '';
@@ -293,11 +313,6 @@ class UserController {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   }
-
-
-
-
-  
 
   public async toggleTwoFactor(req: Request, res: Response) {
     try {
@@ -486,64 +501,75 @@ class UserController {
 
   public async login(req: Request, res: Response) {
     try {
-        const secret = process.env.JWT_SECRET || 'your-secret-key';
-        const userRepository = AppDataSource.getRepository(User);
-        const { email, password } = req.body;
-
+      const secret = process.env.JWT_SECRET || 'your-secret-key';
+      const userRepository = AppDataSource.getRepository(User);
+      const { email, username, password, tenantId } = req.body;
+  
+      let user: User;
+  
+      if (email) {
         // Find user by email
-        const user = await userRepository.findOne({ where: { email } });
-        if (!user) {
-            return res.status(400).json({ statusCode: 400, message: 'Invalid email or password' });
-        }
-
-        // Check if password is correct
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            return res.status(400).json({ statusCode: 400, message: 'Invalid email or password' });
-        }
-
-        // Check if user email is verified
-        if (!user.isVerified) {
-            return res.status(400).json({ statusCode: 400, message: 'Email is not verified' });
-        }
-
-        // Check if user account is active
-        if (!user.accountStatus) {
-          return res.status(401).json({ statusCode: 401, message: 'Account is not active' });
-        }        
-        
-        // Ensure JWT secret is defined
-        if (!secret) {
-            throw new Error('JWT secret key is not defined');
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '1h' });
-
-        const hotelData = await HotelService.getHotelById(user.hotelId);
-        // Respond with token and user info
-        res.status(200).json({
-            statusCode: 200,
-            token,
-            user: {
-                userId: user.id,
-                role: user.role,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                resetPassword: user.resetPassword,
-                onboardingStep: user.onboardingStep,
-                tenantId: user.tenantId,
-                hotelId: user.hotelId,
-                hotelName: hotelData.name,
-                profilePicture: user?.profilePicture,
-            },
-        });
+        user = await userRepository.findOne({ where: { email } });
+      } else if (username && tenantId) {
+        // Find user by username and tenantId
+        user = await userRepository.findOne({ where: { username, tenantId } });
+      }
+  
+      if (!user) {
+        return res.status(400).json({ statusCode: 400, message: 'Invalid credentials' });
+      }
+  
+      // Check if password is correct
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ statusCode: 400, message: 'Invalid credentials' });
+      }
+  
+      // Check if user email is verified
+      if (!user.isVerified) {
+        return res.status(400).json({ statusCode: 400, message: 'Email is not verified' });
+      }
+  
+      // Check if user account is active
+      if (!user.accountStatus) {
+        return res.status(401).json({ statusCode: 401, message: 'Account is not active' });
+      }        
+  
+      // Ensure JWT secret is defined
+      if (!secret) {
+        throw new Error('JWT secret key is not defined');
+      }
+  
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '1h' });
+  
+      const hotelData = await HotelService.getHotelById(user.hotelId);
+  
+      // Respond with token and user info
+      res.status(200).json({
+        statusCode: 200,
+        token,
+        user: {
+          userId: user.id,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          username: user.username,
+          resetPassword: user.resetPassword,
+          onboardingStep: user.onboardingStep,
+          tenantId: user.tenantId,
+          hotelId: user.hotelId,
+          hotelName: hotelData.name,
+          profilePicture: user?.profilePicture,
+        },
+      });
     } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ statusCode: 500, message: 'Server error', error: error.message });
+      console.error('Error during login:', error);
+      res.status(500).json({ statusCode: 500, message: 'Server error', error: error.message });
     }
   }
+  
   
   public async verifyTwoFactorCode(req: Request, res: Response) {
     try {

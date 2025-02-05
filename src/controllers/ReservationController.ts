@@ -160,6 +160,37 @@ export class ReservationController {
   
   
 
+  // static async getReservation(req, res) {
+  //   const { reservationId } = req.params;
+  
+  //   // Check if the id parameter is a valid integer
+  //   if (isNaN(parseInt(reservationId))) {
+  //     return res.status(400).json({ message: "Invalid reservation ID" });
+  //   }
+  
+  //   try {
+  //     // Fetch the reservation with guest and billing details
+  //     const reservation = await ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing"]);
+  
+  //     if (!reservation) {
+  //       return res.status(404).json({ message: "Reservation not found" });
+  //     }
+  
+  //     // Format the response to include all relevant details
+  //     res.status(200).json({
+  //       reservationDetails: {
+  //         ...reservation, // Includes reservation data
+  //         guest: reservation.guest, // Associated guest details
+  //         billing: reservation.billing, // Associated billing details
+  //       },
+  //     });
+  //   } catch (err) {
+  //     console.error("Error fetching reservation:", err.message);
+  //     res.status(500).json({ error: err.message });
+  //   }
+  // }
+  
+  
   static async getReservation(req, res) {
     const { reservationId } = req.params;
   
@@ -170,7 +201,7 @@ export class ReservationController {
   
     try {
       // Fetch the reservation with guest and billing details
-      const reservation = await ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing"]);
+      const reservation = await ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing", "bookedRooms", "bookedRooms.room"]);
   
       if (!reservation) {
         return res.status(404).json({ message: "Reservation not found" });
@@ -179,17 +210,38 @@ export class ReservationController {
       // Format the response to include all relevant details
       res.status(200).json({
         reservationDetails: {
-          ...reservation, // Includes reservation data
+          id: reservation.id,
+          checkInDate: reservation.checkInDate,
+          checkOutDate: reservation.checkOutDate,
+          hotelId: reservation.hotelId,
+          activity: reservation.activity,
+          reservationType: reservation.reservationType,
+          reservationStatus: reservation.reservationStatus,
+          paymentStatus: reservation.paymentStatus,
+          createdBy: reservation.createdBy,
+          numberOfNights: reservation.numberOfNights,
+          role: reservation.role,
+          createdAt: reservation.createdAt,
+          updatedAt: reservation.updatedAt,
+          specialRequest: reservation.specialRequest,
+          notes: reservation.notes,
+          confirmedDate: reservation.confirmedDate,
           guest: reservation.guest, // Associated guest details
           billing: reservation.billing, // Associated billing details
-        },
+          bookedRooms: reservation.bookedRooms.map(room => ({
+            id: room.id,
+            roomName: room.roomName,
+            numberOfAdults: room.numberOfAdults,
+            numberOfChildren: room.numberOfChildren,
+            roomPrice: room.roomPrice
+          }))
+        }
       });
     } catch (err) {
       console.error("Error fetching reservation:", err.message);
       res.status(500).json({ error: err.message });
     }
   }
-  
   
 
  // Create

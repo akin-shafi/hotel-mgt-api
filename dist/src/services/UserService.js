@@ -224,6 +224,19 @@ class UserService {
             }
         });
     }
+    findByUsername(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const normalizedUsername = username.trim().toLowerCase();
+                console.log(`Searching for user with username: ${normalizedUsername}`); // Debugging
+                return yield exports.userRepository.findOne({ where: { username: normalizedUsername } });
+            }
+            catch (error) {
+                console.error('Error finding user by username:', error);
+                throw new Error('Could not find user by username');
+            }
+        });
+    }
     // async findByEmailAndTenant(email: string, tenantId: string): Promise<User | null> {
     //   try {
     //     const normalizedEmail = email.trim().toLowerCase();

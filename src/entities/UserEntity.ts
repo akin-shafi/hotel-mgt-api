@@ -22,6 +22,9 @@ export class User {
   hotelId: number; 
 
   @Column({ unique: true })
+  username: string;
+
+  @Column({ unique: true })
   email: string;
 
   @Column({ nullable: true })

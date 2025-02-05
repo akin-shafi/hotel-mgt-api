@@ -14,7 +14,7 @@ import guestRoutes from './routes/GuestRoutes';
 import housekeepingTaskRoutes from './routes/HousekeepingTaskRoutes';
 import billingRoutes from './routes/BillingRoutes';
 import promotionsRoutes from './routes/promotionsRoutes';
-
+import usbRoutes from './routes/usbRoutes';
 import expressWinston from 'express-winston';
 import logger from './utils/logger';
 import swaggerUI from 'swagger-ui-express';
@@ -43,7 +43,8 @@ AppDataSource.initialize()
         'http://localhost:4200', // Angular
         'http://localhost:5173',  // Vite
         'http://localhost:5174',
-        'https://inntegrate.com',
+        'https://inntegrate.com', 
+        'https://hotelflow.netlify.app',
         'https://checkinsync.com', // Deployed Frontend
       ],
       credentials: true, // Allow credentials
@@ -58,7 +59,8 @@ AppDataSource.initialize()
         'http://localhost:4200',
         'http://localhost:5173',
         'http://localhost:5174',
-        'https://inntegrate.com',
+        'https://inntegrate.com', 
+        'https://hotelflow.netlify.app',
         'https://checkinsync.com',
       ],
       credentials: true,
@@ -90,6 +92,8 @@ AppDataSource.initialize()
     app.use('/housekeeping-tasks', housekeepingTaskRoutes);
     app.use('/api/billing', billingRoutes);
     app.use('/promotions', promotionsRoutes);
+    app.use('/api/usb-devices', usbRoutes);
+    app.use('/api/printer', usbRoutes);
     // Swagger setup
     app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
@@ -100,8 +104,10 @@ AppDataSource.initialize()
 
     // Global error handler
     app.use((err, req, res, next) => {
-      res.header('Access-Control-Allow-Origin', 'https://inntegrate.com')
-      'https://checkinsync.com';
+      res.header(
+        'Access-Control-Allow-Origin', 
+        'https://inntegrate.com', 
+        'https://hotelflow.netlify.app', 'https://checkinsync.com');
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       console.error(err.stack);

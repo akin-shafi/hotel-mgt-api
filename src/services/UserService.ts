@@ -220,6 +220,19 @@ export class UserService {
     }
   } 
 
+  async findByUsername(username: string): Promise<User | null> {
+    try {
+      const normalizedUsername = username.trim().toLowerCase();
+      console.log(`Searching for user with username: ${normalizedUsername}`); // Debugging
+      return await userRepository.findOne({ where: { username: normalizedUsername } });
+    } catch (error) {
+      console.error('Error finding user by username:', error);
+      throw new Error('Could not find user by username');
+    }
+  } 
+
+  
+
   // async findByEmailAndTenant(email: string, tenantId: string): Promise<User | null> {
   //   try {
   //     const normalizedEmail = email.trim().toLowerCase();
