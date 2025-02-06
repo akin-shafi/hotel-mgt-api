@@ -23,18 +23,23 @@ export class ReservationController {
       const bookedRoomRepo = AppDataSource.getRepository(BookedRoom);
       const promotionRepo = AppDataSource.getRepository(Promotion);
   
+      console.log("Guest object:", guestDetails[0].email);
+
       // Use the getGuestByEmail service to find an existing guest
-      let guest = await GuestService.getGuestByEmail(guestDetails.email);
+      let guest = await GuestService.findGuestByEmail(guestDetails[0].email);
   
       if (!guest) {
         // Create a new guest if no record exists
         guest = await GuestService.createGuest(guestDetails);
       }
   
+      // Debug: Log the guest object
+      // console.log("Guest object:", guest);
+  
       // Check for existing reservation with the same guest and reservation dates
       const existingReservation = await reservationRepo.findOne({
         where: {
-          guest: guest,
+          guest: { id: guest.id }, // Ensure the guest ID is used
           checkInDate: reservationDetails.checkInDate,
           checkOutDate: reservationDetails.checkOutDate,
         },
@@ -58,7 +63,7 @@ export class ReservationController {
         // Create a new reservation linked to the guest
         const newReservation = transactionalEntityManager.create(Reservation, {
           ...reservationDetails,
-          guest, // Link the guest object
+          guest, // Ensure this is a valid guest object with an `id`
           createdBy,
           role,
         });
@@ -90,9 +95,9 @@ export class ReservationController {
   
         // Create the new billing linked to the saved reservation
         const newBilling = transactionalEntityManager.create(Billing, {
-          ...billingDetails, // Assume billingDetails contains necessary info such as billing address, payment method, etc.
-          reservation: savedReservation, // Link billing to the saved reservation
-          status: billingStatus, // Set the billing status
+          ...billingDetails,
+          reservation: savedReservation,
+          status: billingStatus,
         });
   
         // Save the billing details
@@ -117,6 +122,7 @@ export class ReservationController {
         // Send response with the new reservation and billing details
         res.status(200).json({
           statusCode: 200,
+          reservationId: savedReservation.id,
           message: "Reservation successful",
         });
       });
@@ -125,8 +131,6 @@ export class ReservationController {
       res.status(500).json({ error: error.message });
     }
   }
-  
-  
   
 
   static async getReservationsByHotelId(req: Request, res: Response) {

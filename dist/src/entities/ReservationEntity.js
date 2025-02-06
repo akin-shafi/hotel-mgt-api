@@ -24,7 +24,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Reservation.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => GuestEntity_1.Guest, (guest) => guest.reservations, { nullable: false, eager: true }),
+    (0, typeorm_1.ManyToOne)(() => GuestEntity_1.Guest, (guest) => guest.reservations, {
+        nullable: false,
+        eager: true,
+        onDelete: 'NO ACTION'
+    }),
     (0, typeorm_1.JoinColumn)({ name: 'guestId' }),
     __metadata("design:type", GuestEntity_1.Guest)
 ], Reservation.prototype, "guest", void 0);
@@ -66,7 +70,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Reservation.prototype, "paymentStatus", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => BillingEntity_1.Billing, (billing) => billing.reservation),
+    (0, typeorm_1.OneToMany)(() => BillingEntity_1.Billing, (billing) => billing.reservation, { cascade: ['remove'] }),
     __metadata("design:type", Array)
 ], Reservation.prototype, "billing", void 0);
 __decorate([

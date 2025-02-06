@@ -62,7 +62,9 @@ __decorate([
     __metadata("design:type", String)
 ], Guest.prototype, "gender", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => ReservationEntity_1.Reservation, (reservation) => reservation.guest),
+    (0, typeorm_1.OneToMany)(() => ReservationEntity_1.Reservation, (reservation) => reservation.guest, {
+        cascade: ['soft-remove'], // 👈 Ensures only reservations are soft-deleted
+    }),
     __metadata("design:type", Array)
 ], Guest.prototype, "reservations", void 0);
 __decorate([

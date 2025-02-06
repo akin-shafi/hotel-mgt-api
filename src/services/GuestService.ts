@@ -25,9 +25,18 @@ export class GuestService {
     });
   }
 
-  static async getGuestByEmail(email: string) {
-    return await guestRepository.findOne({ where: { email } });
-  }
+
+
+  static async findGuestByEmail(email: string): Promise<Guest | null> {
+      try {
+        const normalizedEmail = email.trim().toLowerCase();
+        console.log(`Searching for guest with email: ${normalizedEmail}`); // Debugging
+        return await guestRepository.findOne({ where: { email: normalizedEmail } });
+      } catch (error) {
+        console.error('Error finding guest by email:', error);
+        throw new Error('Could not find guest by email');
+      }
+    }
 
   static async updateGuest(id: number, guestDetails: Partial<Guest>) {
     await guestRepository.update(id, guestDetails);

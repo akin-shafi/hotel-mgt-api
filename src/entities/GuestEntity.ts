@@ -38,8 +38,14 @@ export class Guest {
   @Column({ nullable: true })
   gender: string; // New field for gender
 
-  @OneToMany(() => Reservation, (reservation) => reservation.guest)
+  // @OneToMany(() => Reservation, (reservation) => reservation.guest)
+  // reservations: Reservation[];
+
+  @OneToMany(() => Reservation, (reservation) => reservation.guest, {
+    cascade: ['soft-remove'],  // 👈 Ensures only reservations are soft-deleted
+  })
   reservations: Reservation[];
+  
 
   @CreateDateColumn()
   createdAt: Date;

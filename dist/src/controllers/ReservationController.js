@@ -28,16 +28,19 @@ class ReservationController {
                 const reservationRepo = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
                 const bookedRoomRepo = data_source_1.AppDataSource.getRepository(BookedRoomEntity_1.BookedRoom);
                 const promotionRepo = data_source_1.AppDataSource.getRepository(PromotionEntity_1.Promotion);
+                console.log("Guest object:", guestDetails[0].email);
                 // Use the getGuestByEmail service to find an existing guest
-                let guest = yield GuestService_1.GuestService.getGuestByEmail(guestDetails.email);
+                let guest = yield GuestService_1.GuestService.findGuestByEmail(guestDetails[0].email);
                 if (!guest) {
                     // Create a new guest if no record exists
                     guest = yield GuestService_1.GuestService.createGuest(guestDetails);
                 }
+                // Debug: Log the guest object
+                // console.log("Guest object:", guest);
                 // Check for existing reservation with the same guest and reservation dates
                 const existingReservation = yield reservationRepo.findOne({
                     where: {
-                        guest: guest,
+                        guest: { id: guest.id }, // Ensure the guest ID is used
                         checkInDate: reservationDetails.checkInDate,
                         checkOutDate: reservationDetails.checkOutDate,
                     },
@@ -55,7 +58,7 @@ class ReservationController {
                 // Start a transaction to ensure both reservation and billing are saved atomically
                 yield data_source_1.AppDataSource.manager.transaction((transactionalEntityManager) => __awaiter(this, void 0, void 0, function* () {
                     // Create a new reservation linked to the guest
-                    const newReservation = transactionalEntityManager.create(ReservationEntity_1.Reservation, Object.assign(Object.assign({}, reservationDetails), { guest, // Link the guest object
+                    const newReservation = transactionalEntityManager.create(ReservationEntity_1.Reservation, Object.assign(Object.assign({}, reservationDetails), { guest, // Ensure this is a valid guest object with an `id`
                         createdBy,
                         role }));
                     // Save the reservation first to ensure it has an ID for association
@@ -100,6 +103,7 @@ class ReservationController {
                     // Send response with the new reservation and billing details
                     res.status(200).json({
                         statusCode: 200,
+                        reservationId: savedReservation.id,
                         message: "Reservation successful",
                     });
                 }));

@@ -36,9 +36,17 @@ class GuestService {
             });
         });
     }
-    static getGuestByEmail(email) {
+    static findGuestByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield guestRepository.findOne({ where: { email } });
+            try {
+                const normalizedEmail = email.trim().toLowerCase();
+                console.log(`Searching for guest with email: ${normalizedEmail}`); // Debugging
+                return yield guestRepository.findOne({ where: { email: normalizedEmail } });
+            }
+            catch (error) {
+                console.error('Error finding guest by email:', error);
+                throw new Error('Could not find guest by email');
+            }
         });
     }
     static updateGuest(id, guestDetails) {

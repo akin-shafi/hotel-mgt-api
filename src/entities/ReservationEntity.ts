@@ -19,7 +19,11 @@ export class Reservation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Guest, (guest) => guest.reservations, { nullable: false, eager: true })
+  @ManyToOne(() => Guest, (guest) => guest.reservations, { 
+    nullable: false, 
+    eager: true, 
+    onDelete: 'NO ACTION' 
+  })
   @JoinColumn({ name: 'guestId' })
   guest: Guest;
 
@@ -51,7 +55,7 @@ export class Reservation {
   @Column({ type: 'boolean', default: false })
   paymentStatus: boolean;
 
-  @OneToMany(() => Billing, (billing) => billing.reservation)
+  @OneToMany(() => Billing, (billing) => billing.reservation, { cascade: ['remove'] })
   billing: Billing[];
 
   @Column({ nullable: true })
