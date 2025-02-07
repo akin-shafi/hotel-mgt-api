@@ -198,8 +198,11 @@ export class ReservationService {
     return await reservationRepository.save(newReservation);
   }
 
-  static async updateReservation(id: number, data: Partial<Reservation>): Promise<Reservation | null> {
-    const reservation = await ReservationService.getReservationById(id);
+  static async updateReservation(id: number, data: Partial<Reservation>) {
+    const reservation = await reservationRepository.findOne({
+      where: { id }
+    });
+
     if (!reservation) return null;
     Object.assign(reservation, data);
     return await reservationRepository.save(reservation);
@@ -215,7 +218,7 @@ export class ReservationService {
     const checkInDate = new Date(reservation.checkInDate);
     const checkOutDate = new Date(reservation.checkOutDate);
 
-    if (reservation.activity === ActivityType.CANCELLATION) {
+    if (reservation.activity === ActivityType.CANCELLED) {
       return { activity: "Cancellation", cta: ["Confirm Cancellation", "Reject Cancellation"] };
     }
 

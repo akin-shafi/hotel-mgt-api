@@ -35,8 +35,6 @@ class ReservationController {
                     // Create a new guest if no record exists
                     guest = yield GuestService_1.GuestService.createGuest(guestDetails);
                 }
-                // Debug: Log the guest object
-                // console.log("Guest object:", guest);
                 // Check for existing reservation with the same guest and reservation dates
                 const existingReservation = yield reservationRepo.findOne({
                     where: {
@@ -60,7 +58,7 @@ class ReservationController {
                     // Create a new reservation linked to the guest
                     const newReservation = transactionalEntityManager.create(ReservationEntity_1.Reservation, Object.assign(Object.assign({}, reservationDetails), { guest, // Ensure this is a valid guest object with an `id`
                         createdBy,
-                        role }));
+                        role, activity: reservationDetails.reservationStatus === constants_1.ReservationStatus.CONFIRMED ? constants_1.ActivityType.CHECK_IN : constants_1.ActivityType.PENDING_ARRIVAL }));
                     // Save the reservation first to ensure it has an ID for association
                     const savedReservation = yield transactionalEntityManager.save(newReservation);
                     // Create booked rooms linked to the saved reservation
@@ -218,8 +216,9 @@ class ReservationController {
     static updateReservation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
+            const data = Object.assign({}, req.body);
             try {
-                const updatedReservation = yield ReservationService_1.ReservationService.updateReservation(parseInt(id), req.body);
+                const updatedReservation = yield ReservationService_1.ReservationService.updateReservation(parseInt(id), data);
                 if (!updatedReservation) {
                     return res.status(404).json({ message: "Reservation not found" });
                 }

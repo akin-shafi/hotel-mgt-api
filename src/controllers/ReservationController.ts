@@ -24,7 +24,7 @@ export class ReservationController {
       const promotionRepo = AppDataSource.getRepository(Promotion);
   
       console.log("Guest object:", guestDetails[0].email);
-
+  
       // Use the getGuestByEmail service to find an existing guest
       let guest = await GuestService.findGuestByEmail(guestDetails[0].email);
   
@@ -32,9 +32,6 @@ export class ReservationController {
         // Create a new guest if no record exists
         guest = await GuestService.createGuest(guestDetails);
       }
-  
-      // Debug: Log the guest object
-      // console.log("Guest object:", guest);
   
       // Check for existing reservation with the same guest and reservation dates
       const existingReservation = await reservationRepo.findOne({
@@ -66,6 +63,7 @@ export class ReservationController {
           guest, // Ensure this is a valid guest object with an `id`
           createdBy,
           role,
+          activity: reservationDetails.reservationStatus === ReservationStatus.CONFIRMED ? ActivityType.CHECK_IN : ActivityType.PENDING_ARRIVAL,
         });
   
         // Save the reservation first to ensure it has an ID for association
@@ -131,6 +129,7 @@ export class ReservationController {
       res.status(500).json({ error: error.message });
     }
   }
+  
   
 
   static async getReservationsByHotelId(req: Request, res: Response) {
@@ -251,8 +250,10 @@ export class ReservationController {
  // Create
   static async updateReservation(req: Request, res: Response) {
     const { id } = req.params;
+    const data = { ...req.body };
     try {
-      const updatedReservation = await ReservationService.updateReservation(parseInt(id), req.body);
+      const updatedReservation = await ReservationService.updateReservation(parseInt(id), data);
+      
       if (!updatedReservation) {
         return res.status(404).json({ message: "Reservation not found" });
       }

@@ -38,12 +38,13 @@ var MaintenanceStatus;
 // Enum for reservation status
 var ActivityType;
 (function (ActivityType) {
-    ActivityType["ARRIVAL"] = "Arrival";
-    ActivityType["CHECK_IN"] = "Check-in";
-    ActivityType["CHECK_OUT"] = "Check-out";
-    ActivityType["DUE_OUT"] = "Due-out";
-    ActivityType["BOOKINGS"] = "Booking";
-    ActivityType["CANCELLATION"] = "Cancelled";
+    ActivityType["PENDING_ARRIVAL"] = "pending_arrival";
+    ActivityType["CHECK_IN"] = "check_in";
+    ActivityType["CHECK_OUT"] = "check_out";
+    ActivityType["DUE_OUT"] = "due-out";
+    ActivityType["BOOKINGS"] = "booking";
+    ActivityType["REQUEST_CANCELLATION"] = "request_cancellation";
+    ActivityType["CANCELLED"] = "cancelled";
 })(ActivityType || (exports.ActivityType = ActivityType = {}));
 // Enum for reservation type
 var ReservationType;
@@ -56,6 +57,7 @@ var ReservationStatus;
     ReservationStatus["PENDING"] = "pending";
     ReservationStatus["CONFIRMED"] = "confirmed";
     ReservationStatus["CANCELLED"] = "cancelled";
+    ReservationStatus["TRANSACTION_COMPLETED"] = "transaction_completed";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));
 // Enum for the billing status
 var BillingStatus;

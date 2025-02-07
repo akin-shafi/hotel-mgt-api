@@ -37,12 +37,14 @@ export enum AccountStatus {
 
   // Enum for reservation status
 export enum ActivityType {
-  ARRIVAL = 'Arrival',
-  CHECK_IN = 'Check-in',
-  CHECK_OUT = 'Check-out',
-  DUE_OUT = 'Due-out',
-  BOOKINGS = 'Booking',
-  CANCELLATION = 'Cancelled',
+  PENDING_ARRIVAL = 'pending_arrival',
+  CHECK_IN = 'check_in',
+  CHECK_OUT = 'check_out',
+  DUE_OUT = 'due-out',
+  BOOKINGS = 'booking',
+  REQUEST_CANCELLATION = 'request_cancellation',
+  CANCELLED = 'cancelled',
+
 }
 
 // Enum for reservation type
@@ -55,6 +57,7 @@ export enum ReservationStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
+  TRANSACTION_COMPLETED = 'transaction_completed',
 }
 
 

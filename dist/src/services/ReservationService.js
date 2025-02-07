@@ -182,7 +182,9 @@ class ReservationService {
     }
     static updateReservation(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const reservation = yield ReservationService.getReservationById(id);
+            const reservation = yield reservationRepository.findOne({
+                where: { id }
+            });
             if (!reservation)
                 return null;
             Object.assign(reservation, data);
@@ -200,7 +202,7 @@ class ReservationService {
             const today = new Date(currentDate);
             const checkInDate = new Date(reservation.checkInDate);
             const checkOutDate = new Date(reservation.checkOutDate);
-            if (reservation.activity === constants_1.ActivityType.CANCELLATION) {
+            if (reservation.activity === constants_1.ActivityType.CANCELLED) {
                 return { activity: "Cancellation", cta: ["Confirm Cancellation", "Reject Cancellation"] };
             }
             if (reservation.reservationType === constants_1.ReservationType.ONLINE_RESERVATION && reservation.reservationStatus === constants_1.ReservationStatus.CONFIRMED) {
