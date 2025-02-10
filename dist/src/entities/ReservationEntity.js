@@ -66,9 +66,29 @@ __decorate([
     __metadata("design:type", String)
 ], Reservation.prototype, "reservationStatus", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: 0 }),
+    __metadata("design:type", Number)
+], Reservation.prototype, "nightSpent", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Reservation.prototype, "refund", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'boolean', default: false }),
     __metadata("design:type", Boolean)
 ], Reservation.prototype, "paymentStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false }),
+    __metadata("design:type", Number)
+], Reservation.prototype, "totalBalance", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false }),
+    __metadata("design:type", Number)
+], Reservation.prototype, "totalPaid", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false }),
+    __metadata("design:type", Number)
+], Reservation.prototype, "grandTotal", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => BillingEntity_1.Billing, (billing) => billing.reservation, { cascade: ['remove'] }),
     __metadata("design:type", Array)

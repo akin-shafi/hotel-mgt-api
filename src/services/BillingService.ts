@@ -11,7 +11,7 @@ export class BillingService {
 
 
   // BillingService
-  async createBill(billDetails: Partial<Billing>): Promise<Billing> {
+  static async createBill(billDetails: Partial<Billing>): Promise<Billing> {
     const user = billingRepository.create(billDetails);
     return billingRepository.save(user);
   }

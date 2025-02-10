@@ -28,7 +28,7 @@ class BillingController {
                     return res.status(404).json({ message: "Reservation not found." });
                 }
                 // Generate bills for each service
-                const bills = yield Promise.all(services.map((service) => billingService.createBill(Object.assign({ reservationId }, service))));
+                const bills = yield Promise.all(services.map((service) => BillingService_1.BillingService.createBill(Object.assign({ reservationId }, service))));
                 // Return all created bills
                 res.status(201).json(bills);
             }

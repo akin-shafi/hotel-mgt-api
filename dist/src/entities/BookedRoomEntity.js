@@ -1,12 +1,4 @@
 "use strict";
-// import {
-//     Entity,
-//     PrimaryGeneratedColumn,
-//     Column,
-//     ManyToOne,
-//     JoinColumn,
-//   } from 'typeorm';
-//   import { Reservation } from './ReservationEntity';
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -18,26 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookedRoom = void 0;
-//   @Entity('rooms')
-//   export class BookedRoomEntity {
-//     @PrimaryGeneratedColumn()
-//     id: number;
-//     @Column()
-//     roomName: string;
-//     @Column()
-//     numberOfAdults: number;
-//     @Column()
-//     numberOfChildren: number;
-//     @Column({ type: 'decimal', precision: 10, scale: 2 })
-//     roomPrice: number;
-//     @ManyToOne(() => Reservation, (reservation) => reservation.rooms, { nullable: false })
-//     @JoinColumn({ name: 'reservationId' })
-//     reservation: Reservation;
-//     @Column({ nullable: true })
-//     reservationId: number; // Stores the reservation ID
-//     @Column()
-//     hotelId: number;
-//   }
 const typeorm_1 = require("typeorm");
 const ReservationEntity_1 = require("./ReservationEntity");
 const RoomEntity_1 = require("./RoomEntity");

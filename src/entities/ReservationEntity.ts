@@ -52,8 +52,25 @@ export class Reservation {
   @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.PENDING })
   reservationStatus: ReservationStatus;
 
+
+  @Column({nullable: true,  default: 0 })
+  nightSpent: number;
+
+  @Column({nullable: true})
+  refund: number;
+  
+  
   @Column({ type: 'boolean', default: false })
   paymentStatus: boolean;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false })
+  totalBalance: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false })
+  totalPaid: number; // New field for total price before tax
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: false })
+  grandTotal: number; // New field for total price after tax
 
   @OneToMany(() => Billing, (billing) => billing.reservation, { cascade: ['remove'] })
   billing: Billing[];

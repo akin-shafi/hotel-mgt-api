@@ -78,7 +78,7 @@ class GuestController {
                 if (!email || typeof email !== "string") {
                     return res.status(400).json({ message: "Email is required and must be a valid string" });
                 }
-                const guest = yield GuestService_1.GuestService.getGuestByEmail(email);
+                const guest = yield GuestService_1.GuestService.findGuestByEmail(email);
                 if (!guest) {
                     return res.status(404).json({ message: "Guest not found" });
                 }

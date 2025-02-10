@@ -19,7 +19,7 @@ const billingRepository = data_source_1.AppDataSource.getRepository(BillingEntit
 const reservationRepository = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
 class BillingService {
     // BillingService
-    createBill(billDetails) {
+    static createBill(billDetails) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = billingRepository.create(billDetails);
             return billingRepository.save(user);

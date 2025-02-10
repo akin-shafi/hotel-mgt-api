@@ -9,13 +9,14 @@ import { AppDataSource } from '../data-source';
 import { ActivityType, ReservationStatus, ReservationType, BillingStatus  } from "../constants"
 import { Promotion } from "../entities/PromotionEntity";
 import { Room } from "../entities/RoomEntity";
+import { BillingService } from "../services/BillingService";
 
 
 const reservationService = new ReservationService();
 
 export class ReservationController {
 
-  static async createReservation(req: Request, res: Response) {
+  static async createReservation(req, res) {
     const { guestDetails, reservationDetails, createdBy, role, billingDetails } = req.body;
   
     try {
@@ -23,20 +24,24 @@ export class ReservationController {
       const bookedRoomRepo = AppDataSource.getRepository(BookedRoom);
       const promotionRepo = AppDataSource.getRepository(Promotion);
   
-      console.log("Guest object:", guestDetails[0].email);
-  
-      // Use the getGuestByEmail service to find an existing guest
+      // Find or create the guest
       let guest = await GuestService.findGuestByEmail(guestDetails[0].email);
   
       if (!guest) {
-        // Create a new guest if no record exists
-        guest = await GuestService.createGuest(guestDetails);
+        console.log("Guest not found, creating a new guest.");
+        guest = await GuestService.createGuest(guestDetails[0]);
+        console.log("New guest created:", guest);
+      }
+  
+      if (!guest || !guest.id) {
+        console.log("Failed to create or retrieve guest.");
+        return res.status(500).json({ error: "Failed to create or retrieve guest." });
       }
   
       // Check for existing reservation with the same guest and reservation dates
       const existingReservation = await reservationRepo.findOne({
         where: {
-          guest: { id: guest.id }, // Ensure the guest ID is used
+          guest: { id: guest.id },
           checkInDate: reservationDetails.checkInDate,
           checkOutDate: reservationDetails.checkOutDate,
         },
@@ -55,22 +60,26 @@ export class ReservationController {
         return res.status(400).json({ error: "Invalid reservation status." });
       }
   
-      // Start a transaction to ensure both reservation and billing are saved atomically
       await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
         // Create a new reservation linked to the guest
         const newReservation = transactionalEntityManager.create(Reservation, {
           ...reservationDetails,
-          guest, // Ensure this is a valid guest object with an `id`
+          guest,
           createdBy,
           role,
           activity: reservationDetails.reservationStatus === ReservationStatus.CONFIRMED ? ActivityType.CHECK_IN : ActivityType.PENDING_ARRIVAL,
+          totalBalance: billingDetails.balance,
+          totalPaid: billingDetails.amountPaid,
+          grandTotal: billingDetails.grandTotal,
         });
   
         // Save the reservation first to ensure it has an ID for association
         const savedReservation = await transactionalEntityManager.save(newReservation);
   
+        console.log("Reservation created:", savedReservation);
+  
         // Create booked rooms linked to the saved reservation
-        for (const room of reservationDetails.rooms) {
+        await Promise.all(reservationDetails.rooms.map(async (room) => {
           const roomEntity = await transactionalEntityManager.findOne(Room, { where: { roomName: room.roomName, hotelId: reservationDetails.hotelId } });
           if (roomEntity) {
             const bookedRoom = transactionalEntityManager.create(BookedRoom, {
@@ -82,14 +91,12 @@ export class ReservationController {
               roomName: room.roomName,
             });
             await transactionalEntityManager.save(bookedRoom);
+            console.log("Booked room saved:", bookedRoom);
           }
-        }
+        }));
   
         // Determine billing status
-        const billingStatus =
-          billingDetails.grandTotal > billingDetails.amountPaid
-            ? BillingStatus.PART_PAYMENT
-            : BillingStatus.COMPLETE_PAYMENT;
+        const billingStatus = billingDetails.grandTotal > billingDetails.amountPaid ? BillingStatus.PART_PAYMENT : BillingStatus.COMPLETE_PAYMENT;
   
         // Create the new billing linked to the saved reservation
         const newBilling = transactionalEntityManager.create(Billing, {
@@ -99,21 +106,17 @@ export class ReservationController {
         });
   
         // Save the billing details
-        await transactionalEntityManager.save(newBilling);
+        const savedBilling = await transactionalEntityManager.save(newBilling);
   
         // Update the promotion record if a discount code is used
         if (billingDetails.discountCode) {
-          const promotion = await promotionRepo.findOne({
-            where: {
-              code: billingDetails.discountCode,
-            },
-          });
-  
+          const promotion = await promotionRepo.findOne({ where: { code: billingDetails.discountCode } });
           if (promotion) {
             promotion.status = "used";
-            promotion.usedBy = guestDetails.email;
+            promotion.usedBy = guestDetails[0].email;
             promotion.usedFor = `Reservation ID: ${savedReservation.id}`;
             await transactionalEntityManager.save(promotion);
+            console.log("Promotion updated:", promotion);
           }
         }
   
@@ -130,8 +133,6 @@ export class ReservationController {
     }
   }
   
-  
-
   static async getReservationsByHotelId(req: Request, res: Response) {
     try {
       const { hotelId } = req.params;
@@ -142,17 +143,10 @@ export class ReservationController {
       }
 
       const reservations = await ReservationService.getReservationsByHotelId(Number(hotelId));
-     
-      // if (reservations.length === 0) {
-      //   return res
-      //     .status(404)
-      //     .json({ message: `No reservations found for hotel with ID ${hotelId}.` });
-      // }
 
       if (reservations.length === 0) {
         return res.status(200).json([]);
       }
-      
 
       res.status(200).json(reservations);
     } catch (error) {
@@ -160,40 +154,7 @@ export class ReservationController {
       res.status(500).json({ error: error.message });
     }
   }
-  
-  
 
-  // static async getReservation(req, res) {
-  //   const { reservationId } = req.params;
-  
-  //   // Check if the id parameter is a valid integer
-  //   if (isNaN(parseInt(reservationId))) {
-  //     return res.status(400).json({ message: "Invalid reservation ID" });
-  //   }
-  
-  //   try {
-  //     // Fetch the reservation with guest and billing details
-  //     const reservation = await ReservationService.getReservationById(parseInt(reservationId), ["guest", "billing"]);
-  
-  //     if (!reservation) {
-  //       return res.status(404).json({ message: "Reservation not found" });
-  //     }
-  
-  //     // Format the response to include all relevant details
-  //     res.status(200).json({
-  //       reservationDetails: {
-  //         ...reservation, // Includes reservation data
-  //         guest: reservation.guest, // Associated guest details
-  //         billing: reservation.billing, // Associated billing details
-  //       },
-  //     });
-  //   } catch (err) {
-  //     console.error("Error fetching reservation:", err.message);
-  //     res.status(500).json({ error: err.message });
-  //   }
-  // }
-  
-  
   static async getReservation(req, res) {
     const { reservationId } = req.params;
   
@@ -211,35 +172,7 @@ export class ReservationController {
       }
   
       // Format the response to include all relevant details
-      res.status(200).json({
-        reservationDetails: {
-          id: reservation.id,
-          checkInDate: reservation.checkInDate,
-          checkOutDate: reservation.checkOutDate,
-          hotelId: reservation.hotelId,
-          activity: reservation.activity,
-          reservationType: reservation.reservationType,
-          reservationStatus: reservation.reservationStatus,
-          paymentStatus: reservation.paymentStatus,
-          createdBy: reservation.createdBy,
-          numberOfNights: reservation.numberOfNights,
-          role: reservation.role,
-          createdAt: reservation.createdAt,
-          updatedAt: reservation.updatedAt,
-          specialRequest: reservation.specialRequest,
-          notes: reservation.notes,
-          confirmedDate: reservation.confirmedDate,
-          guest: reservation.guest, // Associated guest details
-          billing: reservation.billing, // Associated billing details
-          bookedRooms: reservation.bookedRooms.map(room => ({
-            id: room.id,
-            roomName: room.roomName,
-            numberOfAdults: room.numberOfAdults,
-            numberOfChildren: room.numberOfChildren,
-            roomPrice: room.roomPrice
-          }))
-        }
-      });
+      res.status(200).json({reservation});
     } catch (err) {
       console.error("Error fetching reservation:", err.message);
       res.status(500).json({ error: err.message });
@@ -262,6 +195,131 @@ export class ReservationController {
       res.status(500).json({ error: err.message });
     }
   }
+
+
+  static async addPayment(req: Request, res: Response) {
+    const { reservationId, amountPaid, paymentMethod } = req.body;
+
+    try {
+      await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
+        const reservationRepo = transactionalEntityManager.getRepository(Reservation);
+
+        // Find the reservation
+        const reservation = await reservationRepo.findOne({
+          where: { id: reservationId },
+          relations: ["billing", "guest"], // Ensure "guest" is included
+        });
+
+        if (!reservation) {
+          return res.status(404).json({ error: "Reservation not found" });
+        }
+
+        // Convert numeric fields from string to number
+        const totalPaid = Number(reservation.totalPaid) || 0;
+        const grandTotal = Number(reservation.grandTotal) || 0;
+        const newAmountPaid = Number(amountPaid) || 0;
+
+        // Calculate new totalPaid and balance
+        const updatedTotalPaid = totalPaid + newAmountPaid;
+        let updatedBalance = grandTotal - updatedTotalPaid;
+
+        // Prevent negative balance
+        if (updatedBalance < 0) {
+          updatedBalance = 0;
+        }
+
+        // Update Reservation table
+        reservation.totalPaid = updatedTotalPaid;
+        reservation.totalBalance = updatedBalance;
+
+        // Save updated reservation
+        const savedReservation = await reservationRepo.save(reservation);
+        console.log("Reservation Updated:", savedReservation);
+
+        // Ensure guest exists
+        const guestName = reservation.guest?.fullName || "Unknown Guest";
+
+        // Use the BillingService to create a new billing entry
+        const newBilling = await BillingService.createBill({
+          amountPaid: newAmountPaid,
+          payment_method: paymentMethod,
+          balance: updatedBalance,
+          billTo: guestName,
+          reservation: savedReservation, // Pass the updated reservation object
+        });
+        // console.log("Billing Created:", newBilling);
+
+        res.status(200).json({
+          statusCode: 200,
+          message: "Payment added successfully",
+          totalPaid: updatedTotalPaid.toFixed(2),
+          totalBalance: updatedBalance.toFixed(2),
+        });
+      });
+    } catch (error) {
+      console.error("Error adding payment:", error.message);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+
+  static async exchangeRoom(req: Request, res: Response) {
+    const {
+      reservationId,
+      roomId,
+      roomName,
+      checkOutDate,
+      roomPrice,
+      grandTotal,
+      updatedAt,
+    } = req.body;
+
+    try {
+      await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
+        const reservationRepo = transactionalEntityManager.getRepository(Reservation);
+        const bookedRoomRepo = transactionalEntityManager.getRepository(BookedRoom);
+
+        // Find the reservation
+        const reservation = await reservationRepo.findOne({
+          where: { id: reservationId },
+          relations: ["bookedRooms"], // Ensure "bookedRooms" is included
+        });
+
+        if (!reservation) {
+          return res.status(404).json({ error: "Reservation not found" });
+        }
+
+        // Update the reservation details
+        reservation.checkOutDate = checkOutDate;
+        reservation.grandTotal = grandTotal;
+        reservation.updatedAt = new Date(updatedAt);
+
+        // Update the booked room details
+        const bookedRoom = reservation.bookedRooms[0];
+        bookedRoom.room = roomId;
+        bookedRoom.roomName = roomName;
+        bookedRoom.roomPrice = roomPrice;
+
+        // Save updated reservation and booked room
+        // console.log("reservation:", reservation);
+        // console.log("bookedRoom:", bookedRoom);
+        await reservationRepo.save(reservation);
+        await bookedRoomRepo.save(bookedRoom);
+
+        res.status(200).json({
+          statusCode: 200,
+          message: "Room exchanged successfully",
+          reservation,
+          bookedRoom,
+        });
+      });
+    } catch (error) {
+      console.error("Error exchanging room:", error.message);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+  
+  
 
   static async deleteReservation(req: Request, res: Response) {
     const { id } = req.params;

@@ -65,7 +65,7 @@ class GuestController {
         return res.status(400).json({ message: "Email is required and must be a valid string" });
       }
   
-      const guest = await GuestService.getGuestByEmail(email);
+      const guest = await GuestService.findGuestByEmail(email);
       if (!guest) {
         return res.status(404).json({ message: "Guest not found" });
       }

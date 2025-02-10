@@ -73,7 +73,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Billing.prototype, "promotionAmount", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => ReservationEntity_1.Reservation, (reservation) => reservation.billing),
+    (0, typeorm_1.ManyToOne)(() => ReservationEntity_1.Reservation, (reservation) => reservation.billing, { nullable: false }),
     (0, typeorm_1.JoinColumn)({ name: 'reservationId' }),
     __metadata("design:type", ReservationEntity_1.Reservation)
 ], Billing.prototype, "reservation", void 0);

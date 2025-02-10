@@ -69,6 +69,10 @@ class ReservationService {
                     relations: ["guest", "billing", "hotel", "bookedRooms", "bookedRooms.room"], // Include related entities
                     order: { id: "DESC" } // Sort by id in descending order
                 });
+                const formatter = new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN',
+                });
                 // Map reservations to the desired structure
                 const guests = reservations.map((reservation) => {
                     const checkInDate = new Date(reservation.checkInDate);
@@ -94,9 +98,14 @@ class ReservationService {
                         notes: reservation.notes || '', // If notes are available
                         status: reservation.reservationStatus,
                         activity: reservation.activity || 'arrivals', // Default to 'arrivals' if activity is not specified
+                        billing: reservation.billing,
+                        totalBalance: reservation.totalBalance,
+                        totalPaid: reservation.totalPaid,
+                        grandTotal: reservation.grandTotal,
                         createdAt: formattedDate
                     };
                 });
+                // console.log("Test 1", guests);
                 return guests;
             }
             catch (error) {
@@ -105,13 +114,6 @@ class ReservationService {
             }
         });
     }
-    // static async getReservationById(id: number, relations: string[] = []): Promise<Reservation | null> {
-    //   const reservationRepo = AppDataSource.getRepository(Reservation);
-    //   return reservationRepo.findOne({
-    //     where: { id },
-    //     relations, // Dynamically include the specified relations
-    //   });
-    // }
     static getReservationById(id_1) {
         return __awaiter(this, arguments, void 0, function* (id, relations = []) {
             try {
@@ -123,6 +125,10 @@ class ReservationService {
                 if (!reservation) {
                     return null;
                 }
+                const formatter = new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN',
+                });
                 const checkInDate = new Date(reservation.checkInDate);
                 const checkOutDate = new Date(reservation.checkOutDate);
                 const numberOfNights = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24);
@@ -133,6 +139,37 @@ class ReservationService {
                     numberOfChildren: bookedRoom.numberOfChildren,
                     roomPrice: bookedRoom.roomPrice,
                 }));
+                // console.log("roomDetails", roomDetails);
+                // reservationDetails: {
+                //   id: reservation.id,
+                //   checkInDate: reservation.checkInDate,
+                //   checkOutDate: reservation.checkOutDate,
+                //   hotelId: reservation.hotelId,
+                //   activity: reservation.activity,
+                //   reservationType: reservation.reservationType,
+                //   reservationStatus: reservation.reservationStatus,
+                //   paymentStatus: reservation.paymentStatus,
+                //   totalBalance: reservation.totalBalance,
+                //   totalPaid: reservation.totalPaid,
+                //   grandTotal: reservation.grandTotal,
+                //   createdBy: reservation.createdBy,
+                //   numberOfNights: reservation.numberOfNights,
+                //   role: reservation.role,
+                //   createdAt: reservation.createdAt,
+                //   updatedAt: reservation.updatedAt,
+                //   specialRequest: reservation.specialRequest,
+                //   notes: reservation.notes,
+                //   confirmedDate: reservation.confirmedDate,
+                //   guest: reservation.guest, // Associated guest details
+                //   billing: reservation.billing, // Associated billing details
+                //   bookedRooms: reservation.bookedRooms.map(room => ({
+                //     id: room.id,
+                //     roomName: room.roomName,
+                //     numberOfAdults: room.numberOfAdults,
+                //     numberOfChildren: room.numberOfChildren,
+                //     roomPrice: room.roomPrice
+                //   }))
+                // }
                 const formattedReservation = {
                     id: reservation.id.toString(),
                     checkInDate: reservation.checkInDate,
@@ -142,8 +179,12 @@ class ReservationService {
                     reservationType: reservation.reservationType,
                     reservationStatus: reservation.reservationStatus,
                     paymentStatus: reservation.paymentStatus,
+                    totalBalance: reservation.totalBalance,
+                    totalPaid: reservation.totalPaid,
+                    grandTotal: reservation.grandTotal,
                     createdBy: reservation.createdBy,
                     numberOfNights: numberOfNights,
+                    nightSpent: reservation.nightSpent,
                     role: reservation.role,
                     createdAt: reservation.createdAt,
                     updatedAt: reservation.updatedAt,
@@ -154,6 +195,7 @@ class ReservationService {
                     billing: reservation.billing,
                     bookedRooms: roomDetails,
                 };
+                // console.log("Test 2", formattedReservation);
                 return formattedReservation;
             }
             catch (error) {

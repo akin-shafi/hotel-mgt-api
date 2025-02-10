@@ -47,9 +47,9 @@ export class Billing {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   promotionAmount: number; // New field for promotion amount
 
-  @ManyToOne(() => Reservation, (reservation) => reservation.billing)
+  @ManyToOne(() => Reservation, (reservation) => reservation.billing, { nullable: false })
   @JoinColumn({ name: 'reservationId' })
-  reservation: Reservation;
+  reservation: Reservation; // Changed from reservationId to reservation
 
   @CreateDateColumn()
   created_at: Date;

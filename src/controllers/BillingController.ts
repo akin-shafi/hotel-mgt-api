@@ -27,7 +27,7 @@ class BillingController {
       // Generate bills for each service
       const bills = await Promise.all(
         services.map((service) =>
-          billingService.createBill({
+          BillingService.createBill({
             reservationId,
             ...service, // Include service-specific data
           })

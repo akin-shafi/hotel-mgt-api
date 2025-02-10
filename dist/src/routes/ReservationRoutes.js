@@ -104,6 +104,159 @@ router.get('/activity-options', ReservationController_1.ReservationController.ge
 router.get('/activity-metrics', ReservationController_1.ReservationController.getActivityMetrics);
 /**
  * @swagger
+ * /api/reservations/add-payment:
+ *   post:
+ *     summary: Add a payment to a reservation
+ *     tags:
+ *       - Payments
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reservationId:
+ *                 type: integer
+ *                 example: 1
+ *               amountPaid:
+ *                 type: number
+ *                 example: 5000.00
+ *               paymentMethod:
+ *                 type: string
+ *                 example: "cash"
+ *     responses:
+ *       200:
+ *         description: Payment added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Payment added successfully"
+ *                 totalPaid:
+ *                   type: number
+ *                   example: 15000.00
+ *                 totalBalance:
+ *                   type: number
+ *                   example: 35000.00
+ *       404:
+ *         description: Reservation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Reservation not found"
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.post("/add-payment", ReservationController_1.ReservationController.addPayment);
+/**
+ * @swagger
+ * /api/reservations/exchange-room:
+ *   post:
+ *     summary: Exchange a room in a reservation
+ *     tags:
+ *       - Reservations
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reservationId:
+ *                 type: integer
+ *                 example: 1
+ *               roomName:
+ *                 type: string
+ *                 example: "Deluxe Suite"
+ *               checkOutDate:
+ *                 type: string
+ *                 format: date
+ *                 example: "2025-02-10"
+ *               roomPrice:
+ *                 type: number
+ *                 example: 200.00
+ *               grandTotal:
+ *                 type: number
+ *                 example: 4000.00
+ *     responses:
+ *       200:
+ *         description: Room exchanged successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Room exchanged successfully"
+ *                 reservation:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     checkOutDate:
+ *                       type: string
+ *                       format: date
+ *                       example: "2025-02-10"
+ *                     grandTotal:
+ *                       type: number
+ *                       example: 4000.00
+ *                 bookedRoom:
+ *                   type: object
+ *                   properties:
+ *                     roomName:
+ *                       type: string
+ *                       example: "Deluxe Suite"
+ *                     roomPrice:
+ *                       type: number
+ *                       example: 200.00
+ *       404:
+ *         description: Reservation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Reservation not found"
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.post("/exchange-room", ReservationController_1.ReservationController.exchangeRoom);
+/**
+ * @swagger
  * /api/reservations/by-id/{reservationId}:
  *   get:
  *     summary: Retrieve a reservation by ID
