@@ -315,76 +315,93 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *             type: object
  *             properties:
  *               guestDetails:
- *                 type: object
- *                 properties:
- *                   fullName:
- *                     type: string
- *                   email:
- *                     type: string
- *                   phone:
- *                     type: string
- *                   address:
- *                     type: string
- *                   idProof:
- *                     type: string
- *                     nullable: true
- *                   identityType:
- *                     type: string
- *                     nullable: true
- *                   identityNumber:
- *                     type: string
- *                     nullable: true
- *                   nationality:
- *                     type: string
- *                     nullable: true
- *                   gender:
- *                     type: string
- *                     nullable: true
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: number
+ *                     idProof:
+ *                       type: string
+ *                       nullable: true
+ *                     fullName:
+ *                       type: string
+ *                     phone:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     address:
+ *                       type: string
+ *                     identityType:
+ *                       type: string
+ *                       nullable: true
+ *                     identityNumber:
+ *                       type: string
+ *                       nullable: true
+ *                     nationality:
+ *                       type: string
+ *                       nullable: true
+ *                     gender:
+ *                       type: string
  *               reservationDetails:
  *                 type: object
  *                 properties:
  *                   checkInDate:
  *                     type: string
- *                     format: date
+ *                     format: date-time
  *                   checkOutDate:
  *                     type: string
- *                     format: date
+ *                     format: date-time
+ *                   rooms:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         roomName:
+ *                           type: string
+ *                         roomId:
+ *                           type: number
+ *                         numberOfAdults:
+ *                           type: number
+ *                         numberOfChildren:
+ *                           type: number
+ *                         roomPrice:
+ *                           type: number
+ *                           format: float
+ *                   numberOfNights:
+ *                     type: number
+ *                   totalPrice:
+ *                     type: number
+ *                     format: float
+ *                   token:
+ *                     type: string
+ *                   hotelId:
+ *                     type: number
  *                   reservationType:
  *                     type: string
  *                     enum:
- *                       - Walk-In
- *                       - Booked-Online
- *                   status:
+ *                       - walk_in
+ *                       - booked_online
+ *                   reservationStatus:
  *                     type: string
  *                     enum:
  *                       - pending
- *                       - completed
+ *                       - confirmed
+ *                       - checked_in
  *                       - cancelled
- *                   activity:
- *                     type: string
- *                     enum:
- *                       - Arrival
- *                       - In-House
- *                       - Departure
- *                       - Bookings
- *                       - Cancellation
- *                   paymentStatus:
- *                     type: boolean
- *                   confirmedDate:
- *                     type: string
- *                     format: date
- *                     description: Date when the reservation was confirmed (if applicable).
- *                   specialRequest:
- *                     type: array
- *                     items:
- *                       type: string
- *                     description: Optional special requests made by the guest.
- *                   notes:
- *                     type: string
- *                     nullable: true
+ *                       - checked_out
  *               billingDetails:
  *                 type: object
  *                 properties:
+ *                   payment_method:
+ *                     type: string
+ *                     enum:
+ *                       - bank_transfer
+ *                       - credit_card
+ *                       - paypal
+ *                       - cash
+ *                   billTo:
+ *                     type: string
  *                   amountPaid:
  *                     type: number
  *                     format: float
@@ -395,9 +412,6 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *                     type: number
  *                     format: float
  *                     nullable: true
- *                   totalPrice:
- *                     type: number
- *                     format: float
  *                   grandTotal:
  *                     type: number
  *                     format: float
@@ -408,22 +422,6 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *                     type: number
  *                     format: float
  *                     nullable: true
- *                   status:
- *                     type: string
- *                     enum:
- *                       - complete_payment
- *                       - part_payment
- *                       - request_refund
- *                       - refunded
- *                   payment_method:
- *                     type: string
- *                     enum:
- *                       - credit_card
- *                       - paypal
- *                       - cash
- *                   discountCode:
- *                     type: string
- *                     nullable: true
  *                   promotionType:
  *                     type: string
  *                     nullable: true
@@ -431,28 +429,30 @@ router.get("/by-id/:reservationId/status", ReservationController_1.ReservationCo
  *                     type: number
  *                     format: float
  *                     nullable: true
- *                   due_date:
- *                     type: string
- *                     format: date
- *                     nullable: true
- *                   billing_address:
- *                     type: string
- *                     nullable: true
- *                   payment_date:
- *                     type: string
- *                     format: date
- *                     nullable: true
  *               createdBy:
- *                 type: string
+ *                 type: number
  *               role:
  *                 type: string
+ *               createdAt:
+ *                 type: string
+ *                 format: date-time
  *     responses:
- *       201:
- *         description: Reservation created successfully
+ *       200:
+ *         description: Reservation successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Reservation'
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: number
+ *                   example: 200
+ *                 reservationId:
+ *                   type: number
+ *                   example: 123
+ *                 message:
+ *                   type: string
+ *                   example: "Reservation successful"
  *       500:
  *         description: Internal server error
  *         content:

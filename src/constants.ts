@@ -26,13 +26,14 @@ export enum AccountStatus {
 
 
   export enum MaintenanceStatus {
+    AVAILABLE = 'available',
     CLEAN = 'clean',
     DIRTY = 'dirty',
     UNDER_MAINTENANCE = 'under_maintenance',
     OUT_OF_ORDER = 'out_of_order',
     SCHEDULED_FOR_CLEANING = 'scheduled_for_cleaning',
     SCHEDULED_FOR_MAINTENANCE = 'scheduled_for_maintenance',
-    IN_USE = 'in_use',
+    OCCUPIED = 'occupied',
   }
 
   // Enum for reservation status

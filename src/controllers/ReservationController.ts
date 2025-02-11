@@ -1,43 +1,43 @@
 import { Request, Response } from "express";
 import { ReservationService } from "../services/ReservationService";
+import { GuestService } from "../services/GuestService";
+import { BillingService } from "../services/BillingService";
 import { Guest } from "../entities/GuestEntity";
 import { Billing } from "../entities/BillingEntity";
-import { GuestService } from "../services/GuestService";
-import { Reservation, } from "../entities/ReservationEntity";
-import { BookedRoom, } from "../entities/BookedRoomEntity";
-import { AppDataSource } from '../data-source';
-import { ActivityType, ReservationStatus, ReservationType, BillingStatus  } from "../constants"
-import { Promotion } from "../entities/PromotionEntity";
+import { Reservation } from "../entities/ReservationEntity";
+import { BookedRoom } from "../entities/BookedRoomEntity";
 import { Room } from "../entities/RoomEntity";
-import { BillingService } from "../services/BillingService";
-
+import { Promotion } from "../entities/PromotionEntity";
+import { AppDataSource } from '../data-source';
+import { ActivityType, ReservationStatus, ReservationType, BillingStatus, MaintenanceStatus } from "../constants";
 
 const reservationService = new ReservationService();
 
 export class ReservationController {
 
-  static async createReservation(req, res) {
+  static async createReservation(req: Request, res: Response) {
     const { guestDetails, reservationDetails, createdBy, role, billingDetails } = req.body;
-  
+
     try {
       const reservationRepo = AppDataSource.getRepository(Reservation);
       const bookedRoomRepo = AppDataSource.getRepository(BookedRoom);
       const promotionRepo = AppDataSource.getRepository(Promotion);
-  
+      const roomRepo = AppDataSource.getRepository(Room);
+
       // Find or create the guest
       let guest = await GuestService.findGuestByEmail(guestDetails[0].email);
-  
+
       if (!guest) {
         console.log("Guest not found, creating a new guest.");
         guest = await GuestService.createGuest(guestDetails[0]);
         console.log("New guest created:", guest);
       }
-  
+
       if (!guest || !guest.id) {
         console.log("Failed to create or retrieve guest.");
         return res.status(500).json({ error: "Failed to create or retrieve guest." });
       }
-  
+
       // Check for existing reservation with the same guest and reservation dates
       const existingReservation = await reservationRepo.findOne({
         where: {
@@ -46,20 +46,20 @@ export class ReservationController {
           checkOutDate: reservationDetails.checkOutDate,
         },
       });
-  
+
       if (existingReservation) {
         return res.status(400).json({ error: "Reservation already exists for the same dates." });
       }
-  
+
       // Validate reservation type and status using enums
       if (!Object.values(ReservationType).includes(reservationDetails.reservationType)) {
         return res.status(400).json({ error: "Invalid reservation type." });
       }
-  
+
       if (!Object.values(ReservationStatus).includes(reservationDetails.reservationStatus)) {
         return res.status(400).json({ error: "Invalid reservation status." });
       }
-  
+
       await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
         // Create a new reservation linked to the guest
         const newReservation = transactionalEntityManager.create(Reservation, {
@@ -72,12 +72,12 @@ export class ReservationController {
           totalPaid: billingDetails.amountPaid,
           grandTotal: billingDetails.grandTotal,
         });
-  
+
         // Save the reservation first to ensure it has an ID for association
         const savedReservation = await transactionalEntityManager.save(newReservation);
-  
-        console.log("Reservation created:", savedReservation);
-  
+
+        // console.log("Reservation created:", savedReservation);
+
         // Create booked rooms linked to the saved reservation
         await Promise.all(reservationDetails.rooms.map(async (room) => {
           const roomEntity = await transactionalEntityManager.findOne(Room, { where: { roomName: room.roomName, hotelId: reservationDetails.hotelId } });
@@ -91,23 +91,27 @@ export class ReservationController {
               roomName: room.roomName,
             });
             await transactionalEntityManager.save(bookedRoom);
-            console.log("Booked room saved:", bookedRoom);
+
+            // Update the room's maintenance status to OCCUPIED
+            roomEntity.maintenanceStatus = MaintenanceStatus.OCCUPIED;
+            await transactionalEntityManager.save(roomEntity);
+            // console.log("Booked room saved and status updated:", bookedRoom);
           }
         }));
-  
+
         // Determine billing status
         const billingStatus = billingDetails.grandTotal > billingDetails.amountPaid ? BillingStatus.PART_PAYMENT : BillingStatus.COMPLETE_PAYMENT;
-  
+
         // Create the new billing linked to the saved reservation
         const newBilling = transactionalEntityManager.create(Billing, {
           ...billingDetails,
           reservation: savedReservation,
           status: billingStatus,
         });
-  
+
         // Save the billing details
         const savedBilling = await transactionalEntityManager.save(newBilling);
-  
+
         // Update the promotion record if a discount code is used
         if (billingDetails.discountCode) {
           const promotion = await promotionRepo.findOne({ where: { code: billingDetails.discountCode } });
@@ -116,10 +120,10 @@ export class ReservationController {
             promotion.usedBy = guestDetails[0].email;
             promotion.usedFor = `Reservation ID: ${savedReservation.id}`;
             await transactionalEntityManager.save(promotion);
-            console.log("Promotion updated:", promotion);
+            // console.log("Promotion updated:", promotion);
           }
         }
-  
+
         // Send response with the new reservation and billing details
         res.status(200).json({
           statusCode: 200,
@@ -132,6 +136,7 @@ export class ReservationController {
       res.status(500).json({ error: error.message });
     }
   }
+
   
   static async getReservationsByHotelId(req: Request, res: Response) {
     try {
@@ -181,20 +186,33 @@ export class ReservationController {
   
 
  // Create
-  static async updateReservation(req: Request, res: Response) {
-    const { id } = req.params;
-    const data = { ...req.body };
-    try {
-      const updatedReservation = await ReservationService.updateReservation(parseInt(id), data);
-      
-      if (!updatedReservation) {
-        return res.status(404).json({ message: "Reservation not found" });
-      }
-      res.json(updatedReservation);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+ static async updateReservation(req: Request, res: Response) {
+  const { id } = req.params;
+  const data = { ...req.body };
+  
+  try {
+    const updatedReservation = await ReservationService.updateReservation(parseInt(id), data);
+    
+    if (!updatedReservation) {
+      return res.status(404).json({ message: "Reservation not found" });
     }
+
+    if (data.activity === ActivityType.CHECK_OUT) {
+      const roomRepo = AppDataSource.getRepository(Room);
+      await Promise.all(data.rooms.map(async (room) => {
+        const roomEntity = await roomRepo.findOne({ where: { id: room.id } });
+        if (roomEntity) {
+          roomEntity.maintenanceStatus = MaintenanceStatus.AVAILABLE;
+          await roomRepo.save(roomEntity);
+        }
+      }));
+    }
+
+    res.json(updatedReservation);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+}
 
 
   static async addPayment(req: Request, res: Response) {

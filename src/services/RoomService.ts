@@ -20,25 +20,30 @@ export class RoomService {
 }
 
 
-  static async getAllRooms() {
-    return await AppDataSource.getRepository(Room).find();
-  }
+static async getAllRooms() {
+  return await AppDataSource.getRepository(Room).find({
+    order: { id: 'ASC' },
+  });
+}
+
 
   static async getRoomsByhotelId(hotelId: number) {
     try {
       const roomRepository = AppDataSource.getRepository(Room);
-
-      // Fetch rooms by talentId
+  
+      // Fetch rooms by hotelId and order by roomName in ascending order
       const rooms = await roomRepository.find({
-        where: { hotelId }, // Assuming "hotelId" exists in your Room entity
+        where: { hotelId },
+        order: { roomName: 'ASC' },
       });
-
+  
       return rooms;
     } catch (error) {
       console.error("Error fetching rooms by hotel ID:", error);
       throw new Error("Unable to fetch rooms.");
     }
   }
+  
 
   static async getRoomById(id: number) {
     return await AppDataSource.getRepository(Room).findOneBy({ id });

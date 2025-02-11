@@ -46,6 +46,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], BookedRoom.prototype, "roomPrice", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], BookedRoom.prototype, "createdAt", void 0);
 exports.BookedRoom = BookedRoom = __decorate([
     (0, typeorm_1.Entity)('booked_rooms')
 ], BookedRoom);

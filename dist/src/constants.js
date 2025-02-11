@@ -27,13 +27,14 @@ var OnboardingStatus;
 })(OnboardingStatus || (exports.OnboardingStatus = OnboardingStatus = {}));
 var MaintenanceStatus;
 (function (MaintenanceStatus) {
+    MaintenanceStatus["AVAILABLE"] = "available";
     MaintenanceStatus["CLEAN"] = "clean";
     MaintenanceStatus["DIRTY"] = "dirty";
     MaintenanceStatus["UNDER_MAINTENANCE"] = "under_maintenance";
     MaintenanceStatus["OUT_OF_ORDER"] = "out_of_order";
     MaintenanceStatus["SCHEDULED_FOR_CLEANING"] = "scheduled_for_cleaning";
     MaintenanceStatus["SCHEDULED_FOR_MAINTENANCE"] = "scheduled_for_maintenance";
-    MaintenanceStatus["IN_USE"] = "in_use";
+    MaintenanceStatus["OCCUPIED"] = "occupied";
 })(MaintenanceStatus || (exports.MaintenanceStatus = MaintenanceStatus = {}));
 // Enum for reservation status
 var ActivityType;

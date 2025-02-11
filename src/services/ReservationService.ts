@@ -1,5 +1,7 @@
 import { AppDataSource } from "../data-source"; // Your database connection
 import { Reservation } from "../entities/ReservationEntity";
+import { BookedRoom } from '../entities/BookedRoomEntity';
+import { Billing } from '../entities/BillingEntity';
 import { Repository, In } from "typeorm";
 import {ActivityType, ReservationStatus, ReservationType } from "../constants"
 
@@ -247,9 +249,30 @@ export class ReservationService {
   }
 
   static async deleteReservation(id: number): Promise<boolean> {
-    const result = await reservationRepository.delete(id);
-    return result.affected === 1;
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+    const bookedRoomRepository = AppDataSource.getRepository(BookedRoom);
+    const billingRepository = AppDataSource.getRepository(Billing);
+
+    const reservation = await reservationRepository.findOne({ where: { id } });
+
+    if (!reservation) {
+      return false;
+    }
+
+    await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
+      // Delete related booked rooms
+      await transactionalEntityManager.delete(BookedRoom, { reservation });
+
+      // Delete related billing records
+      await transactionalEntityManager.delete(Billing, { reservation });
+
+      // Delete the reservation itself
+      await transactionalEntityManager.delete(Reservation, { id });
+    });
+
+    return true;
   }
+
 
   static async determineStatus(reservation: Reservation, currentDate: Date): Promise<{ activity: string; cta: string[] }> {
     const today = new Date(currentDate);

@@ -11,15 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReservationController = void 0;
 const ReservationService_1 = require("../services/ReservationService");
-const BillingEntity_1 = require("../entities/BillingEntity");
 const GuestService_1 = require("../services/GuestService");
+const BillingService_1 = require("../services/BillingService");
+const BillingEntity_1 = require("../entities/BillingEntity");
 const ReservationEntity_1 = require("../entities/ReservationEntity");
 const BookedRoomEntity_1 = require("../entities/BookedRoomEntity");
+const RoomEntity_1 = require("../entities/RoomEntity");
+const PromotionEntity_1 = require("../entities/PromotionEntity");
 const data_source_1 = require("../data-source");
 const constants_1 = require("../constants");
-const PromotionEntity_1 = require("../entities/PromotionEntity");
-const RoomEntity_1 = require("../entities/RoomEntity");
-const BillingService_1 = require("../services/BillingService");
 const reservationService = new ReservationService_1.ReservationService();
 class ReservationController {
     static createReservation(req, res) {
@@ -29,6 +29,7 @@ class ReservationController {
                 const reservationRepo = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
                 const bookedRoomRepo = data_source_1.AppDataSource.getRepository(BookedRoomEntity_1.BookedRoom);
                 const promotionRepo = data_source_1.AppDataSource.getRepository(PromotionEntity_1.Promotion);
+                const roomRepo = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
                 // Find or create the guest
                 let guest = yield GuestService_1.GuestService.findGuestByEmail(guestDetails[0].email);
                 if (!guest) {
@@ -65,7 +66,7 @@ class ReservationController {
                         role, activity: reservationDetails.reservationStatus === constants_1.ReservationStatus.CONFIRMED ? constants_1.ActivityType.CHECK_IN : constants_1.ActivityType.PENDING_ARRIVAL, totalBalance: billingDetails.balance, totalPaid: billingDetails.amountPaid, grandTotal: billingDetails.grandTotal }));
                     // Save the reservation first to ensure it has an ID for association
                     const savedReservation = yield transactionalEntityManager.save(newReservation);
-                    console.log("Reservation created:", savedReservation);
+                    // console.log("Reservation created:", savedReservation);
                     // Create booked rooms linked to the saved reservation
                     yield Promise.all(reservationDetails.rooms.map((room) => __awaiter(this, void 0, void 0, function* () {
                         const roomEntity = yield transactionalEntityManager.findOne(RoomEntity_1.Room, { where: { roomName: room.roomName, hotelId: reservationDetails.hotelId } });
@@ -79,7 +80,10 @@ class ReservationController {
                                 roomName: room.roomName,
                             });
                             yield transactionalEntityManager.save(bookedRoom);
-                            console.log("Booked room saved:", bookedRoom);
+                            // Update the room's maintenance status to OCCUPIED
+                            roomEntity.maintenanceStatus = constants_1.MaintenanceStatus.OCCUPIED;
+                            yield transactionalEntityManager.save(roomEntity);
+                            // console.log("Booked room saved and status updated:", bookedRoom);
                         }
                     })));
                     // Determine billing status
@@ -96,7 +100,7 @@ class ReservationController {
                             promotion.usedBy = guestDetails[0].email;
                             promotion.usedFor = `Reservation ID: ${savedReservation.id}`;
                             yield transactionalEntityManager.save(promotion);
-                            console.log("Promotion updated:", promotion);
+                            // console.log("Promotion updated:", promotion);
                         }
                     }
                     // Send response with the new reservation and billing details
@@ -164,6 +168,16 @@ class ReservationController {
                 const updatedReservation = yield ReservationService_1.ReservationService.updateReservation(parseInt(id), data);
                 if (!updatedReservation) {
                     return res.status(404).json({ message: "Reservation not found" });
+                }
+                if (data.activity === constants_1.ActivityType.CHECK_OUT) {
+                    const roomRepo = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
+                    yield Promise.all(data.rooms.map((room) => __awaiter(this, void 0, void 0, function* () {
+                        const roomEntity = yield roomRepo.findOne({ where: { id: room.id } });
+                        if (roomEntity) {
+                            roomEntity.maintenanceStatus = constants_1.MaintenanceStatus.AVAILABLE;
+                            yield roomRepo.save(roomEntity);
+                        }
+                    })));
                 }
                 res.json(updatedReservation);
             }

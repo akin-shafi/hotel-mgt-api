@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReservationService = void 0;
 const data_source_1 = require("../data-source"); // Your database connection
 const ReservationEntity_1 = require("../entities/ReservationEntity");
+const BookedRoomEntity_1 = require("../entities/BookedRoomEntity");
+const BillingEntity_1 = require("../entities/BillingEntity");
 const typeorm_1 = require("typeorm");
 const constants_1 = require("../constants");
 let reservationRepository;
@@ -235,8 +237,22 @@ class ReservationService {
     }
     static deleteReservation(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield reservationRepository.delete(id);
-            return result.affected === 1;
+            const reservationRepository = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
+            const bookedRoomRepository = data_source_1.AppDataSource.getRepository(BookedRoomEntity_1.BookedRoom);
+            const billingRepository = data_source_1.AppDataSource.getRepository(BillingEntity_1.Billing);
+            const reservation = yield reservationRepository.findOne({ where: { id } });
+            if (!reservation) {
+                return false;
+            }
+            yield data_source_1.AppDataSource.manager.transaction((transactionalEntityManager) => __awaiter(this, void 0, void 0, function* () {
+                // Delete related booked rooms
+                yield transactionalEntityManager.delete(BookedRoomEntity_1.BookedRoom, { reservation });
+                // Delete related billing records
+                yield transactionalEntityManager.delete(BillingEntity_1.Billing, { reservation });
+                // Delete the reservation itself
+                yield transactionalEntityManager.delete(ReservationEntity_1.Reservation, { id });
+            }));
+            return true;
         });
     }
     static determineStatus(reservation, currentDate) {

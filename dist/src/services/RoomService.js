@@ -33,16 +33,19 @@ class RoomService {
     }
     static getAllRooms() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).find();
+            return yield data_source_1.AppDataSource.getRepository(RoomEntity_1.Room).find({
+                order: { id: 'ASC' },
+            });
         });
     }
     static getRoomsByhotelId(hotelId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
-                // Fetch rooms by talentId
+                // Fetch rooms by hotelId and order by roomName in ascending order
                 const rooms = yield roomRepository.find({
-                    where: { hotelId }, // Assuming "hotelId" exists in your Room entity
+                    where: { hotelId },
+                    order: { roomName: 'ASC' },
                 });
                 return rooms;
             }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Reservation } from './ReservationEntity';
 import { Room } from './RoomEntity';
 
@@ -15,9 +15,8 @@ export class BookedRoom {
   @JoinColumn({ name: 'roomId' })
   room: Room;
 
-  @Column({ nullable: true})
+  @Column({ nullable: true })
   roomName: string;
-  
 
   @Column({ type: 'int', default: 1 })
   numberOfAdults: number;
@@ -27,4 +26,7 @@ export class BookedRoom {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   roomPrice: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
