@@ -1,6 +1,8 @@
 // src/services/RoomService.ts
 import { AppDataSource } from '../data-source';
 import { Room } from '../entities/RoomEntity';
+import { MaintenanceStatus } from "../constants";
+import { Between } from 'typeorm';
 
 const roomRepository = AppDataSource.getRepository(Room);
 export class RoomService {
@@ -26,6 +28,68 @@ static async getAllRooms() {
   });
 }
 
+
+static async getRoomsByStatus(hotelId: number, status: string, startDate: Date, endDate: Date) {
+  const roomRepository = AppDataSource.getRepository(Room);
+
+  // Define status conditions based on the status input
+  let statusCondition = {};
+  if (status === 'available') {
+    statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.CLEAN };
+  } else if (status === 'occupied') {
+    statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.OCCUPIED };
+  } else if (status === 'outOfOrder') {
+    statusCondition = { maintenanceStatus: MaintenanceStatus.OUT_OF_ORDER };
+  } else {
+    throw new Error('Invalid status');
+  }
+
+  console.log(`Status Condition: ${JSON.stringify(statusCondition)}`);
+
+  // Ensure the query focuses on the date only
+  const startOfDay = new Date(startDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(endDate);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  // Query the room repository with the defined conditions and date range
+  const rooms = await roomRepository.find({
+    where: { hotelId, ...statusCondition, updatedAt: Between(startOfDay, endOfDay) },
+    order: { roomName: 'ASC' },
+  });
+
+  console.log(`Query Result: ${JSON.stringify(rooms)}`);
+
+  return rooms;
+}
+
+// static async getRoomsByStatus(hotelId: number, status: string, startDate: Date, endDate: Date) {
+//   const roomRepository = AppDataSource.getRepository(Room);
+
+//   // Define status conditions based on the status input
+//   let statusCondition = {};
+//   if (status === 'available') {
+//     statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.CLEAN };
+//   } else if (status === 'occupied') {
+//     statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.OCCUPIED };
+//   } else if (status === 'outOfOrder') {
+//     statusCondition = { maintenanceStatus: MaintenanceStatus.OUT_OF_ORDER };
+//   } else {
+//     throw new Error('Invalid status');
+//   }
+
+//   console.log(`Status Condition: ${JSON.stringify(statusCondition)}`);
+
+//   // Query the room repository with the defined conditions and date range
+//   const rooms = await roomRepository.find({
+//     where: { hotelId, ...statusCondition, updatedAt: Between(startDate, endDate) },
+//     order: { roomName: 'ASC' },
+//   });
+
+//   console.log(`Query Result: ${JSON.stringify(rooms)}`);
+
+//   return rooms;
+// }
 
   static async getRoomsByhotelId(hotelId: number) {
     try {

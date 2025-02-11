@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DashboardMetricsService_1 = __importDefault(require("../services/DashboardMetricsService"));
+const RoomService_1 = require("../services/RoomService");
 class DashboardMetricsController {
     getRoomStatus(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -26,6 +27,22 @@ class DashboardMetricsController {
             }
             catch (error) {
                 return res.status(500).json({ message: 'Internal Server Error', error });
+            }
+        });
+    }
+    getRoomsByStatus(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { hotelId, status, startDate, endDate } = req.query;
+                if (!hotelId || !status || !startDate || !endDate) {
+                    return res.status(400).send('Missing required parameters');
+                }
+                const rooms = yield RoomService_1.RoomService.getRoomsByStatus(Number(hotelId), String(status), new Date(String(startDate)), new Date(String(endDate)));
+                return res.status(200).json(rooms);
+            }
+            catch (error) {
+                console.error('Error fetching rooms by status:', error);
+                return res.status(500).send('Internal Server Error');
             }
         });
     }

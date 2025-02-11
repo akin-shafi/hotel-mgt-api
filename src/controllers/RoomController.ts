@@ -69,6 +69,7 @@ export class RoomController {
   }
 
 
+
   static async createRoom(req: Request, res: Response) {
     try {
       const { tenantId, hotelId, roomData } = req.body;

@@ -44,6 +44,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Room.prototype, "tenantId", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', precision: 0 }),
+    __metadata("design:type", Date)
+], Room.prototype, "updatedAt", void 0);
 exports.Room = Room = __decorate([
     (0, typeorm_1.Entity)()
 ], Room);

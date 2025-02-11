@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { MaintenanceStatus } from "../constants";
 // import { Reservation } from './ReservationEntity';
 
@@ -25,7 +25,6 @@ export class Room {
   @Column({ nullable: true })
   tenantId: string;
 
-
-
-
+  @UpdateDateColumn({ type: 'timestamp', precision: 0 })
+  updatedAt: Date
 }
