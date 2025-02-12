@@ -9,7 +9,7 @@ export class CombinedService {
         // Room Services
         const roomStatus = await DashboardMetricsService.getRoomStatus(hotelId, startDate, endDate);
         const roomsByStatus = await RoomService.getRoomsByStatus(hotelId, 'available', startDate, endDate);
-        const availableRoomsByType = await RoomService.getAvailableRoomsByType(hotelId, startDate, endDate);
+        const availableRoomsByType = await RoomService.getRoomStatusByType(hotelId, startDate, endDate);
         const occupancyPercentage = await RoomService.getOccupancyPercentage(hotelId, date);
     
         // // Reservation Services

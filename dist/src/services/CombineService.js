@@ -20,7 +20,7 @@ class CombinedService {
             // Room Services
             const roomStatus = yield DashboardMetricsService_1.DashboardMetricsService.getRoomStatus(hotelId, startDate, endDate);
             const roomsByStatus = yield RoomService_1.RoomService.getRoomsByStatus(hotelId, 'available', startDate, endDate);
-            const availableRoomsByType = yield RoomService_1.RoomService.getAvailableRoomsByType(hotelId, startDate, endDate);
+            const availableRoomsByType = yield RoomService_1.RoomService.getRoomStatusByType(hotelId, startDate, endDate);
             const occupancyPercentage = yield RoomService_1.RoomService.getOccupancyPercentage(hotelId, date);
             // // Reservation Services
             const adrData = yield ReservationService_1.ReservationService.getADR(hotelId, date);
