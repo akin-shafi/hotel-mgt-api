@@ -1,6 +1,6 @@
+// Room
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { MaintenanceStatus } from "../constants";
-// import { Reservation } from './ReservationEntity';
 
 @Entity()
 export class Room {
@@ -19,6 +19,12 @@ export class Room {
   @Column({ type: 'enum', enum: MaintenanceStatus, default: MaintenanceStatus.CLEAN })
   maintenanceStatus: MaintenanceStatus;
 
+  @Column({ nullable: false, default: false })
+  isComplimentary: boolean;
+
+  @Column({ nullable: false, default: false })
+  isStaffRoom: boolean;
+
   @Column()
   hotelId: number;
 
@@ -26,5 +32,5 @@ export class Room {
   tenantId: string;
 
   @UpdateDateColumn({ type: 'timestamp', precision: 0 })
-  updatedAt: Date
+  updatedAt: Date;
 }

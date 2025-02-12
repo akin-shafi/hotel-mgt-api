@@ -15,6 +15,7 @@ import housekeepingTaskRoutes from './routes/HousekeepingTaskRoutes';
 import billingRoutes from './routes/BillingRoutes';
 import promotionsRoutes from './routes/promotionsRoutes';
 import DashboardMetricsRoutes from './routes/DashboardMetricsRoutes';
+import MetricsRoutes from './routes/MetricsRoutes';
 import usbRoutes from './routes/usbRoutes';
 import expressWinston from 'express-winston';
 import logger from './utils/logger';
@@ -96,6 +97,7 @@ AppDataSource.initialize()
     app.use('/api/usb-devices', usbRoutes);
     app.use('/api/printer', usbRoutes);
     app.use('/api/dashboard-metrics', DashboardMetricsRoutes);
+    app.use('/api', MetricsRoutes);
     
     // Swagger setup
     app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));

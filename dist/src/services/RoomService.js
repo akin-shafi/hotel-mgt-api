@@ -15,6 +15,7 @@ const data_source_1 = require("../data-source");
 const RoomEntity_1 = require("../entities/RoomEntity");
 const constants_1 = require("../constants");
 const typeorm_1 = require("typeorm");
+const ReservationEntity_1 = require("../entities/ReservationEntity");
 const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
 class RoomService {
     static getRoomByHotelIdAndRoomName(hotelId, roomName) {
@@ -72,28 +73,104 @@ class RoomService {
             return rooms;
         });
     }
-    // static async getRoomsByStatus(hotelId: number, status: string, startDate: Date, endDate: Date) {
+    // static async getAvailableRoomsByType(hotelId: number, startDate: Date, endDate: Date) {
     //   const roomRepository = AppDataSource.getRepository(Room);
-    //   // Define status conditions based on the status input
-    //   let statusCondition = {};
-    //   if (status === 'available') {
-    //     statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.CLEAN };
-    //   } else if (status === 'occupied') {
-    //     statusCondition = { isAvailable: true, maintenanceStatus: MaintenanceStatus.OCCUPIED };
-    //   } else if (status === 'outOfOrder') {
-    //     statusCondition = { maintenanceStatus: MaintenanceStatus.OUT_OF_ORDER };
-    //   } else {
-    //     throw new Error('Invalid status');
-    //   }
-    //   console.log(`Status Condition: ${JSON.stringify(statusCondition)}`);
-    //   // Query the room repository with the defined conditions and date range
+    //   // Ensure the query focuses on the date only
+    //   const startOfDay = new Date(startDate);
+    //   startOfDay.setHours(0, 0, 0, 0);
+    //   const endOfDay = new Date(endDate);
+    //   endOfDay.setHours(23, 59, 59, 999);
+    //   // Query the room repository to get available rooms within the date range
     //   const rooms = await roomRepository.find({
-    //     where: { hotelId, ...statusCondition, updatedAt: Between(startDate, endDate) },
-    //     order: { roomName: 'ASC' },
+    //     where: {
+    //       hotelId,
+    //       isAvailable: true,
+    //       maintenanceStatus: MaintenanceStatus.CLEAN,
+    //       updatedAt: Between(startOfDay, endOfDay)
+    //     },
+    //     order: { roomType: 'ASC' },
     //   });
-    //   console.log(`Query Result: ${JSON.stringify(rooms)}`);
-    //   return rooms;
+    //   // Group the rooms by room type and count the available rooms
+    //   const availableRoomsByType = rooms.reduce((acc, room) => {
+    //     if (!acc[room.roomType]) {
+    //       acc[room.roomType] = 0;
+    //     }
+    //     acc[room.roomType]++;
+    //     return acc;
+    //   }, {});
+    //   console.log(`Available Rooms by Type: ${JSON.stringify(availableRoomsByType)}`);
+    //   return availableRoomsByType;
     // }
+    static getRoomStatusByType(hotelId, startDate, endDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
+            // Ensure the query focuses on the date only
+            const startOfDay = new Date(startDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(endDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            // Query the room repository to get all rooms within the date range
+            const rooms = yield roomRepository.find({
+                where: { hotelId, updatedAt: (0, typeorm_1.Between)(startOfDay, endOfDay) },
+                order: { roomType: 'ASC' }
+            });
+            // Initialize the result object
+            const result = {
+                available: {},
+                occupied: {}
+            };
+            // Populate the result object
+            rooms.forEach(room => {
+                const roomType = room.roomType;
+                if (room.isAvailable && room.maintenanceStatus === constants_1.MaintenanceStatus.CLEAN) {
+                    if (!result.available[roomType]) {
+                        result.available[roomType] = 0;
+                    }
+                    result.available[roomType]++;
+                }
+                else {
+                    if (!result.occupied[roomType]) {
+                        result.occupied[roomType] = 0;
+                    }
+                    result.occupied[roomType]++;
+                }
+            });
+            // Calculate total available and occupied rooms
+            result.available["Total Available"] = Object.values(result.available).reduce((acc, value) => acc + value, 0);
+            result.occupied["Total Occupied"] = Object.values(result.occupied).reduce((acc, value) => acc + value, 0);
+            console.log(`Room Status by Type: ${JSON.stringify(result)}`);
+            return result;
+        });
+    }
+    static getOccupancyPercentage(hotelId, date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const roomRepository = data_source_1.AppDataSource.getRepository(RoomEntity_1.Room);
+            const reservationRepository = data_source_1.AppDataSource.getRepository(ReservationEntity_1.Reservation);
+            // Ensure the query focuses on the date only
+            const startOfDay = new Date(date);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(date);
+            endOfDay.setHours(23, 59, 59, 999);
+            // Get all rooms for the hotel
+            const totalRooms = yield roomRepository.count({ where: { hotelId } });
+            // Get all reservations for the hotel on the given date
+            const reservations = yield reservationRepository.find({
+                where: {
+                    hotelId,
+                    updatedAt: (0, typeorm_1.Between)(startOfDay, endOfDay),
+                },
+                relations: ['bookedRooms'],
+            });
+            // Count occupied rooms
+            const occupiedRooms = reservations.reduce((acc, reservation) => {
+                return acc + reservation.bookedRooms.length;
+            }, 0);
+            // Calculate occupancy percentage
+            const occupancyPercentage = (occupiedRooms / totalRooms) * 100;
+            console.log(`Occupancy Percentage: ${occupancyPercentage}`);
+            return occupancyPercentage;
+        });
+    }
     static getRoomsByhotelId(hotelId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

@@ -2,8 +2,9 @@ import { AppDataSource } from "../data-source"; // Your database connection
 import { Reservation } from "../entities/ReservationEntity";
 import { BookedRoom } from '../entities/BookedRoomEntity';
 import { Billing } from '../entities/BillingEntity';
-import { Repository, In } from "typeorm";
+import { Repository, In, Between } from "typeorm";
 import {ActivityType, ReservationStatus, ReservationType } from "../constants"
+import { Room } from "../entities/RoomEntity";
 
 let reservationRepository: Repository<Reservation>;
 
@@ -66,8 +67,6 @@ export class ReservationService {
     }
   }
   
-
-
   static async getReservationsByHotelId(hotelId: number): Promise<any[]> {
     try {
       // Fetch reservations by hotelId
@@ -122,7 +121,6 @@ export class ReservationService {
       throw error;
     }
   }
-  
 
   static async getReservationById(id: number, relations: string[] = []): Promise<any | null> {
     try {
@@ -219,20 +217,240 @@ export class ReservationService {
     }
   }
   
-  
-
     /**
    * Fetch multiple reservations by their IDs.
    * @param ids - An array of reservation IDs
    * @returns A promise that resolves to an array of reservations
    */
-   static async getReservationsByIds(ids: number[]): Promise<Reservation[]> {
+  static async getReservationsByIds(ids: number[]): Promise<Reservation[]> {
       return await reservationRepository.find({
         where: { id: In(ids) },
       });
+  }
+
+  static async getADR(hotelId: number, date: Date) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+
+    // Ensure the query focuses on the date only
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Query the reservation repository to get reservations within the date range
+    const reservations = await reservationRepository.find({
+      where: {
+        hotelId,
+        updatedAt: Between(startOfDay, endOfDay),
+      },
+      relations: ['bookedRooms', 'bookedRooms.room'],
+    });
+
+    if (!reservations || reservations.length === 0) {
+      console.log('No reservations found for the specified date range and hotel');
+      return { totalRevenue: 0, roomsSold: 0, adr: 0 }; // No reservations, return default values
     }
 
+    console.log('Reservations:', reservations);
+
+    // Filter out complimentary rooms and staff rooms
+    const saleableReservations = reservations.filter(reservation => 
+      reservation.bookedRooms.some(bookedRoom => bookedRoom.room && !bookedRoom.room.isComplimentary && !bookedRoom.room.isStaffRoom)
+    );
+
+    console.log('Saleable Reservations:', saleableReservations);
+
+    if (saleableReservations.length === 0) {
+      console.log('No saleable reservations found');
+      return { totalRevenue: 0, roomsSold: 0, adr: 0 }; // No saleable reservations, return default values
+    }
+
+    // Calculate total revenue and number of rooms sold
+    const totalRevenue = saleableReservations.reduce((acc, reservation) => {
+      const roomRevenue = reservation.bookedRooms.reduce((roomAcc, bookedRoom) => {
+        return roomAcc + parseFloat(bookedRoom.roomPrice.toString());
+      }, 0);
+      return acc + roomRevenue;
+    }, 0);
+
+    console.log('Total Revenue:', totalRevenue);
+
+    const roomsSold = saleableReservations.reduce((acc, reservation) => acc + reservation.bookedRooms.length, 0);
+
+    console.log('Rooms Sold:', roomsSold);
+
+    // Calculate ADR
+    const adr = roomsSold > 0 ? totalRevenue / roomsSold : 0;
+
+    console.log(`ADR: ${adr}`);
+
+    return { totalRevenue, roomsSold, adr };
+  }
+
+  static async getDueOutReservations(hotelId: number, checkOutDate: Date) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+
+    const startOfDay = new Date(checkOutDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(checkOutDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const dueOutReservations = await reservationRepository.find({
+      where: {
+        hotelId,
+        checkOutDate: Between(startOfDay, endOfDay),
+      },
+      relations: ['guest', 'bookedRooms', 'bookedRooms.room'],
+    });
+
+    return dueOutReservations;
+  }
+
+  static async getReservationsByStatus(hotelId: number, date: Date, status: ActivityType) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const reservations = await reservationRepository.find({
+      where: {
+        hotelId,
+        updatedAt: Between(startOfDay, endOfDay),
+        activity: status
+      },
+      relations: ['guest', 'bookedRooms', 'bookedRooms.room'],
+    });
+
+    return reservations;
+  }
+
+  static async countReservationsByStatus(hotelId: number, date: Date) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const dueOutCount = await reservationRepository.count({
+      where: {
+        hotelId,
+        checkOutDate: Between(startOfDay, endOfDay),
+        activity: ActivityType.CHECK_IN,
+      },
+    });
+
+    const pendingArrivalCount = await reservationRepository.count({
+      where: {
+        hotelId,
+        checkInDate: Between(startOfDay, endOfDay),
+        activity: ActivityType.PENDING_ARRIVAL,
+      },
+    });
+
+    return { dueOutCount, pendingArrivalCount };
+  }
+
+  static async getTotalOutstandingBalance(hotelId: number, date: Date) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const reservations = await reservationRepository.find({
+      where: {
+        hotelId,
+        updatedAt: Between(startOfDay, endOfDay),
+      },
+    });
+
+    const totalOutstandingBalance = reservations.reduce((acc, reservation) => {
+      return acc + parseFloat(reservation.totalBalance.toString());
+    }, 0);
+
+    return totalOutstandingBalance;
+  }
+
+  static async getYearlyRevenue(hotelId: number, year: number) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
     
+    // Initialize an array to hold the monthly revenue data
+    const monthlyRevenue = new Array(12).fill(0);
+
+    for (let month = 0; month < 12; month++) {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0);
+
+      const reservations = await reservationRepository.find({
+        where: {
+          hotelId,
+          updatedAt: Between(startOfMonth, endOfMonth),
+        },
+      });
+
+      const totalRevenue = reservations.reduce((acc, reservation) => {
+        return acc + parseFloat(reservation.totalBalance.toString());
+      }, 0);
+
+      monthlyRevenue[month] = totalRevenue;
+    }
+
+    return monthlyRevenue;
+  }
+
+  static async getYearlyOccupancyAndADR(hotelId: number, year: number) {
+    const reservationRepository = AppDataSource.getRepository(Reservation);
+    const roomRepository = AppDataSource.getRepository(Room);
+
+    // Initialize arrays to hold the monthly occupancy rate and ADR data
+    const monthlyOccupancy = new Array(12).fill(0);
+    const monthlyADR = new Array(12).fill(0);
+
+    // Calculate monthly data
+    for (let month = 0; month < 12; month++) {
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0);
+
+      const reservations = await reservationRepository.find({
+        where: {
+          hotelId,
+          updatedAt: Between(startOfMonth, endOfMonth),
+        },
+        relations: ['bookedRooms', 'bookedRooms.room'],
+      });
+
+      const totalRooms = await roomRepository.count({
+        where: { hotelId },
+      });
+
+      const saleableReservations = reservations.filter(reservation =>
+        reservation.bookedRooms.some(bookedRoom => bookedRoom.room && !bookedRoom.room.isComplimentary && !bookedRoom.room.isStaffRoom)
+      );
+
+      const roomsSold = saleableReservations.reduce((acc, reservation) => acc + reservation.bookedRooms.length, 0);
+
+      const totalRevenue = saleableReservations.reduce((acc, reservation) => {
+        const roomRevenue = reservation.bookedRooms.reduce((roomAcc, bookedRoom) => {
+          return roomAcc + parseFloat(bookedRoom.roomPrice.toString());
+        }, 0);
+        return acc + roomRevenue;
+      }, 0);
+
+      // Calculate occupancy rate
+      monthlyOccupancy[month] = totalRooms > 0 ? (roomsSold / totalRooms) * 100 : 0;
+
+      // Calculate ADR
+      monthlyADR[month] = roomsSold > 0 ? totalRevenue / roomsSold : 0;
+    }
+
+    return { monthlyOccupancy, monthlyADR };
+  }
+
+
   async createReservation(data: Partial<Reservation>): Promise<Reservation> {
     const newReservation = reservationRepository.create(data);
     return await reservationRepository.save(newReservation);

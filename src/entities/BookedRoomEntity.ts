@@ -29,4 +29,6 @@ export class BookedRoom {
 
   @CreateDateColumn()
   createdAt: Date;
+
+
 }

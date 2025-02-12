@@ -10,9 +10,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Room = void 0;
+// Room
 const typeorm_1 = require("typeorm");
 const constants_1 = require("../constants");
-// import { Reservation } from './ReservationEntity';
 let Room = class Room {
 };
 exports.Room = Room;
@@ -36,6 +36,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: constants_1.MaintenanceStatus, default: constants_1.MaintenanceStatus.CLEAN }),
     __metadata("design:type", String)
 ], Room.prototype, "maintenanceStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, default: false }),
+    __metadata("design:type", Boolean)
+], Room.prototype, "isComplimentary", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, default: false }),
+    __metadata("design:type", Boolean)
+], Room.prototype, "isStaffRoom", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)

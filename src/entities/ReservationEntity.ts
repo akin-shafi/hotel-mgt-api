@@ -59,7 +59,6 @@ export class Reservation {
   @Column({nullable: true})
   refund: number;
   
-  
   @Column({ type: 'boolean', default: false })
   paymentStatus: boolean;
 
